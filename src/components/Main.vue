@@ -5,33 +5,64 @@ export default {
 </script>
 
 <template>
+  <header class="header">
+    <div class="logo">
+      <h1>My App</h1>
+    </div>
+    <nav>
+      <ul class="menu">
+        <li><router-link to="/discipline">Дисциплины</router-link></li>
+        <li><router-link to="/subject">Предметы</router-link></li>
+        <li><router-link to="/test">Тесты</router-link></li>
+        <li><router-link to="/practics">Практические</router-link></li>
+        <li><router-link to="/user">Профиль</router-link></li>
+      </ul>
+    </nav>
+  </header>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+/* Основной стиль для хедера */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #007bff;
+  color: white;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+/* Логотип */
+.logo h1 {
+  margin: 0;
+  font-size: 24px;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+/* Стили для навигации */
+nav {
+  font-size: 18px;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+/* Стили для меню */
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+/* Стили для пунктов меню */
+.menu li {
+  margin: 0 15px;
+}
+
+/* Стили для ссылок */
+.menu a {
+  color: white;
+  text-decoration: none;
+}
+
+.menu a:hover {
+  text-decoration: underline;
 }
 </style>

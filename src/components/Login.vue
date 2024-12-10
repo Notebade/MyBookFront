@@ -27,7 +27,6 @@
   
       <!-- Блок для отображения ответа -->
       <div v-if="response" class="response-block">
-        <h3>Response:</h3>
         <pre>{{ response }}</pre>
       </div>
   
@@ -39,29 +38,38 @@
   </template>
   
   <script>
-    import axios from "axios";
+    import { inject } from 'vue';
+    const userData = localStorage.getItem('userData');
+    const user = userData ? JSON.parse(userData) : null;
+    console.log(user);
+    if (user?.login != null && window.location.pathname === '/login') {
+      window.location.replace('/');
+    }
 
-    axios.defaults.baseURL = "http://89.19.44.166:8000";
-    axios.defaults.headers.common["Content-Type"] = "application/json";
-  
   export default {
     name: "LoginForm",
     data() {
       return {
         username: "",
         password: "",
+        client: null,
         response: null,
         error: null,
       };
+    },
+    setup() {
+     const apiClient = inject("apiClient");
+      return {
+        apiClient: apiClient,
+      }
     },
     methods: {
       async handleLogin() {
         this.response = null; // Сброс ответа перед новым запросом
         this.error = null; // Сброс ошибки
-  
         try {
           // Отправляем POST-запрос
-          const res = await axios.post("/user/logging", {
+          const res = await this.apiClient.post("/user/logging", {
             login: this.username,
             password: this.password,
           },
@@ -69,7 +77,9 @@
   
           // Проверяем статус ответа
           if (res.status === 200) {
-            this.response = JSON.stringify(res.data, null, 2); // Парсим ответ в JSON и сохраняем
+            this.response = "Успешно!";
+            localStorage.setItem('userData', JSON.stringify(res.data, null, 2));
+            window.location.replace('/');
           }
         } catch (err) {
           if (err.response && err.response.status === 404) {
