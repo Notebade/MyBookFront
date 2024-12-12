@@ -78,7 +78,7 @@
           if (res.status === 200) {
             this.response = "Успешно!";
             localStorage.setItem('userData', JSON.stringify(res.data, null, 2));
-            window.location.replace('/');
+            //window.location.replace('/');
           }
         } catch (err) {
           if (err.response && err.response.status === 404) {
