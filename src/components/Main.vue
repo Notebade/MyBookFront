@@ -12,7 +12,6 @@ export default {
     <nav>
       <ul class="menu">
         <li><router-link to="/discipline">Дисциплины</router-link></li>
-        <li><router-link to="/subject">Предметы</router-link></li>
         <li><router-link to="/test">Тесты</router-link></li>
         <li><router-link to="/practics">Практические</router-link></li>
         <li><router-link to="/user">Профиль</router-link></li>

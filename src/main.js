@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from "vue-router"; // Для Vue 3
 import Main from "@/components/Main.vue";
 import Login from "@/components/Login.vue";
 import Discipline from "@/components/Discipline.vue";
+import DisciplineEditor from "@/components/DisciplineEditor.vue";
 import apiClient from '@/ApiClient.js';
 
 // Определяем маршруты
@@ -20,6 +21,10 @@ const routes = [
     path: "/discipline",
     component: Discipline,
   },
+  {
+    path: "/discipline/editor",
+    component: DisciplineEditor,
+  }
 ];
 
 const userData = localStorage.getItem('userData');

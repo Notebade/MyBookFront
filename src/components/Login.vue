@@ -41,7 +41,6 @@
     import { inject } from 'vue';
     const userData = localStorage.getItem('userData');
     const user = userData ? JSON.parse(userData) : null;
-    console.log(user);
     if (user?.login != null && window.location.pathname === '/login') {
       window.location.replace('/');
     }

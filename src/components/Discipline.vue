@@ -6,7 +6,6 @@
     <nav>
       <ul class="menu">
         <li><router-link to="/">Главная</router-link></li>
-        <li><router-link to="/subject">Предметы</router-link></li>
         <li><router-link to="/test">Тесты</router-link></li>
         <li><router-link to="/practics">Практические</router-link></li>
         <li><router-link to="/user">Профиль</router-link></li>
@@ -15,59 +14,104 @@
   </header>
   <div class="cards-container">
     <!-- Итерация по данным из API -->
-    <div v-for="item in apiData" :key="item.id" class="card">
-      <div class="card-header">
-        <h3>{{ item.name }}</h3>
-        <p><strong>Code:</strong> {{ item.code }}</p>
-      </div>
-      <div class="card-body">
-        <p><strong>Description:</strong> {{ item.description }}</p>
-        <div class="authors">
-          <p><strong>Authors:</strong></p>
-          <ul>
-            <li v-for="author in item.authors" :key="author.id">
-              {{ author.fullName }}
-            </li>
-          </ul>
-        </div>
-        <!-- Проверка наличия изображения и отображение -->
-        <div v-if="item.media">
-          <img :src="item.media.path" alt="media" class="media-image" />
-        </div>
-      </div>
+    <div 
+  v-for="item in apiData" 
+  :key="item.id" 
+  class="card" 
+  :title="item.description">
+  
+  <div class="card-header">
+    <h3>{{ item.name }}</h3>
+    <!--<p><strong>Code:</strong> {{ item.code }}</p>-->
+  </div>
+  
+  <div class="card-body">
+    <div class="authors">
+      <p><strong>Authors:</strong></p>
+      <ul>
+        <li v-for="author in item.authors" :key="author.id">
+          {{ author.fullName }}
+        </li>
+      </ul>
     </div>
+    <!-- Проверка наличия изображения и отображение -->
+    <div v-if="item.media">
+      <img :src="item.media.path" alt="media" class="media-image" />
+    </div>
+  </div>
+
+  <!-- Блок кнопок -->
+  <div class="card-footer">
+    <button 
+      class="btn edit-btn" 
+      :onclick="`location.href='/discipline/editor/${item.id}'`">
+      Редактировать
+    </button>
+    <button 
+      class="btn navigate-btn" 
+      :onclick="`location.href='/discipline/${item.id}'`">
+      Перейти
+    </button>
+  </div>
+</div>
+
   </div>
 </template>
 
 <script>
 import { inject, ref, onMounted } from 'vue';
 
-export default {
-  setup() {
-    const apiClient = inject("apiClient");
-    const apiData = ref([]);  // Используем ref для реактивных данных
+// Внедрение apiClient для работы с запросами
+const apiClient = inject('apiClient');
 
-    const fetchData = async () => {
-      try {
-        // Отправляем GET-запрос
-        const res = await apiClient.get("/list/disciplines");
-        if (res.status === 200) {
-          apiData.value = res.data; // Сохраняем данные в apiData
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
+// Реактивные данные для списка пользователей и формы
+const users = ref([]);
+const formData = ref({
+  name: '',
+  authors: [],
+  description: ''
+});
 
-    onMounted(() => {
-      fetchData(); // Получаем данные при монтировании компонента
-    });
-
-    return {
-      apiData,
-    };
-  },
+// Функция для загрузки пользователей
+const fetchUsers = async () => {
+  try {
+    const res = await apiClient.get('/list/users');
+    if (res.status === 200) {
+      users.value = res.data; // Сохраняем пользователей в список
+    }
+  } catch (err) {
+    console.error('Error fetching users:', err);
+  }
 };
+
+// Функция отправки данных формы на сервер
+const submitForm = async () => {
+  try {
+    const res = await apiClient.post('/create/discipline', formData.value);
+    if (res.status === 200) {
+      alert('Дисциплина успешно создана!');
+      resetForm();
+    } else {
+      console.error('Ошибка при создании дисциплины:', res.statusText);
+    }
+  } catch (err) {
+    console.error('Error creating discipline:', err);
+  }
+};
+
+// Функция сброса формы
+const resetForm = () => {
+  formData.value = {
+    name: '',
+    authors: [],
+    description: ''
+  };
+};
+
+// Загружаем пользователей при монтировании компонента
+onMounted(() => {
+  fetchUsers();
+});
 </script>
 
 <style scoped>
@@ -76,6 +120,12 @@ export default {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   margin-top: 20px;
+  background-color: rgba(0, 123, 255, 0.4);
+  padding-top: 5vh;
+  padding-left: 1vw;
+  padding-right: 1vw;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
 .card {
@@ -87,6 +137,17 @@ export default {
   padding: 15px;
   display: flex;
   flex-direction: column;
+}
+a.card {
+  text-decoration: inherit; /* Убирает подчеркивание */
+  color: inherit; /* Наследует цвет текста от родителя */
+  display: inherit; /* Делает ссылку блочной, как div */
+  cursor: crosshair; /* Добавляет указатель при наведении */
+}
+
+a.card:hover {
+   background-color: rgba(0, 123, 255, 0.6);
+   cursor: pointer /* Добавляет указатель при наведении */
 }
 
 .card-header {
@@ -122,6 +183,8 @@ header {
   padding: 15px 30px;
   background-color: #007bff;
   color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
 /* Логотип */

@@ -1,6 +1,4 @@
 import axios from 'axios';
-console.log(import.meta.env.API_URL);
-
 const userData = localStorage.getItem('userData');
 const user = userData ? JSON.parse(userData) : null;
 
@@ -15,9 +13,10 @@ const apiClient = axios.create({
 // Интерцепторы запросов
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const userData = localStorage.getItem('userData');
+    const user = userData ? JSON.parse(userData) : null;
+    if (user?.token) {
+      config.headers.Authorization = `Bearer ${user?.token}`;
     }
     return config;
   },
