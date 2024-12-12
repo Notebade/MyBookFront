@@ -59,59 +59,35 @@
 </template>
 
 <script>
+
 import { inject, ref, onMounted } from 'vue';
 
-// Внедрение apiClient для работы с запросами
-const apiClient = inject('apiClient');
+export default {
+  setup() {
+    const apiClient = inject("apiClient");
+    const apiData = ref([]);  // Используем ref для реактивных данных
 
-// Реактивные данные для списка пользователей и формы
-const users = ref([]);
-const formData = ref({
-  name: '',
-  authors: [],
-  description: ''
-});
+    const fetchData = async () => {
+      try {
+        // Отправляем GET-запрос
+        const res = await apiClient.get("/list/disciplines");
+        if (res.status === 200) {
+          apiData.value = res.data; // Сохраняем данные в apiData
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
 
-// Функция для загрузки пользователей
-const fetchUsers = async () => {
-  try {
-    const res = await apiClient.get('/list/users');
-    if (res.status === 200) {
-      users.value = res.data; // Сохраняем пользователей в список
-    }
-  } catch (err) {
-    console.error('Error fetching users:', err);
-  }
+    onMounted(() => {
+      fetchData(); // Получаем данные при монтировании компонента
+    });
+
+    return {
+      apiData,
+    };
+  },
 };
-
-// Функция отправки данных формы на сервер
-const submitForm = async () => {
-  try {
-    const res = await apiClient.post('/create/discipline', formData.value);
-    if (res.status === 200) {
-      alert('Дисциплина успешно создана!');
-      resetForm();
-    } else {
-      console.error('Ошибка при создании дисциплины:', res.statusText);
-    }
-  } catch (err) {
-    console.error('Error creating discipline:', err);
-  }
-};
-
-// Функция сброса формы
-const resetForm = () => {
-  formData.value = {
-    name: '',
-    authors: [],
-    description: ''
-  };
-};
-
-// Загружаем пользователей при монтировании компонента
-onMounted(() => {
-  fetchUsers();
-});
 </script>
 
 <style scoped>
