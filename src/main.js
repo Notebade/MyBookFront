@@ -6,6 +6,7 @@ import Login from "@/components/Login.vue";
 import Discipline from "@/components/Discipline.vue";
 import DisciplineEditor from "@/components/DisciplineEditor.vue";
 import apiClient from '@/ApiClient.js';
+import "@/Main.css";
 
 // Определяем маршруты
 const routes = [
@@ -23,6 +24,10 @@ const routes = [
   },
   {
     path: "/discipline/editor",
+    component: DisciplineEditor,
+  },
+  {
+    path: "/discipline/editor/:id",
     component: DisciplineEditor,
   }
 ];
