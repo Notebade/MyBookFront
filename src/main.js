@@ -7,6 +7,7 @@ import Discipline from "@/components/Discipline.vue";
 import DisciplineEditor from "@/components/DisciplineEditor.vue";
 import SubjectEditor from "@/components/SubjectEditor.vue";
 import Subject from "@/components/Subject.vue";
+import Theme from "@/components/Theme.vue";
 import apiClient from '@/ApiClient.js';
 
 // Определяем маршруты
@@ -42,6 +43,10 @@ const routes = [
   {
     path: "/subject/editor/:id",
     component: SubjectEditor,
+  },
+  {
+    path: "/subject/:id",
+    component: Theme,
   },
 ];
 
