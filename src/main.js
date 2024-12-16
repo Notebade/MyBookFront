@@ -5,6 +5,8 @@ import Main from "@/components/Main.vue";
 import Login from "@/components/Login.vue";
 import Discipline from "@/components/Discipline.vue";
 import DisciplineEditor from "@/components/DisciplineEditor.vue";
+import SubjectEditor from "@/components/SubjectEditor.vue";
+import Subject from "@/components/Subject.vue";
 import apiClient from '@/ApiClient.js';
 
 // Определяем маршруты
@@ -28,7 +30,19 @@ const routes = [
   {
     path: "/discipline/editor/:id",
     component: DisciplineEditor,
-  }
+  },
+  {
+    path: "/discipline/:id",
+    component: Subject,
+  },
+  {
+    path: "/subject/editor",
+    component: SubjectEditor,
+  },
+  {
+    path: "/subject/editor/:id",
+    component: SubjectEditor,
+  },
 ];
 
 const userData = localStorage.getItem('userData');

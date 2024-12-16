@@ -50,6 +50,12 @@
       <div class="form-group">
         <button type="submit">Создать</button>
       </div>
+      <div class="form-group">
+        <button type="button"
+    @click="handleDelete"
+    v-if="formData.id"
+    class="delete-button">Удалить</button>
+      </div>
     </form>
   </div>
 </template>
@@ -78,12 +84,26 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await this.apiClient.get("/list/users");
+        const response = await this.apiClient.post("/list/users");
         this.formData.authors = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке списка пользователей:", error);
       }
     },
+    async handleDelete() {
+    if (!confirm("Вы уверены, что хотите удалить дисциплину?")) return;
+
+    try {
+      const response = await this.apiClient.delete(`/discipline/${this.formData.id}`);
+      if (response.status === 200) {
+        alert("Дисциплина успешно удалена.");
+        window.location.replace('/discipline');
+      }
+    } catch (error) {
+      alert("Ошибка при удалении дисциплины.");
+      console.error(error);
+    }
+  },
     async disciplineLoad(lastParam) {
       try {
         const response = await this.apiClient.get(`/discipline/${lastParam}`);
@@ -226,5 +246,18 @@ export default {
 
 .form-group button:hover {
   background-color: #218838;
+}
+.delete-button {
+  background-color: #dc3545;
+  color: #fff;
+  font-size: 1em;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 10px;
+  border: none;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
 }
 </style>

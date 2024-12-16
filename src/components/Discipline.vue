@@ -12,6 +12,11 @@
       </ul>
     </nav>
   </header>
+  <button 
+      class="btn navigate-btn" 
+      :onclick="`location.href='/discipline/editor'`">
+      Перейти
+    </button>
   <div class="cards-container">
     <!-- Итерация по данным из API -->
     <div 
@@ -69,8 +74,7 @@ export default {
 
     const fetchData = async () => {
       try {
-        // Отправляем GET-запрос
-        const res = await apiClient.get("/list/disciplines");
+        const res = await apiClient.post("/list/disciplines");
         if (res.status === 200) {
           apiData.value = res.data; // Сохраняем данные в apiData
         }
