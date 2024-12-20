@@ -15,7 +15,7 @@
   <button 
       class="btn navigate-btn" 
       :onclick="`location.href='/discipline/editor'`">
-      Перейти
+      Создать
     </button>
   <div class="cards-container">
     <!-- Итерация по данным из API -->

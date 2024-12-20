@@ -8,6 +8,8 @@ import DisciplineEditor from "@/components/DisciplineEditor.vue";
 import SubjectEditor from "@/components/SubjectEditor.vue";
 import Subject from "@/components/Subject.vue";
 import Theme from "@/components/Theme.vue";
+import ThemeEditor from "@/components/ThemeEditor.vue";
+import Text from "@/components/Text.vue";
 import apiClient from '@/ApiClient.js';
 
 // Определяем маршруты
@@ -47,6 +49,14 @@ const routes = [
   {
     path: "/subject/:id",
     component: Theme,
+  },
+  {
+    path: "/theme/editor",
+    component: ThemeEditor,
+  },
+  {
+    path: "/theme/:id",
+    component: Text,
   },
 ];
 

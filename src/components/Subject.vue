@@ -15,7 +15,7 @@
     <button 
       class="btn navigate-btn" 
       :onclick="`location.href='/subject/editor'`">
-      Перейти
+      Создать
     </button>
     <div class="cards-container">
       <div 

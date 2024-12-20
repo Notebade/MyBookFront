@@ -1,6 +1,11 @@
 <template>
     <div class="container">
       <h1>Темы</h1>
+      <button 
+      class="btn navigate-btn" 
+      :onclick="navigateBack">
+      Создать
+    </button>
       <ul>
         <li v-for="theme in themes" :key="theme.id" class="theme-item">
           <router-link :to="`/theme/${theme.id}`" class="theme-link">
@@ -22,7 +27,7 @@
         try {
           const apiClient = inject("apiClient");
           const url = window.location.href;
-          const id = url.split("/").pop(); // Получаем последний сегмент URL
+          const id = url.split("/").pop();
   
           // Получаем данные с сервера
           const response = await apiClient.post('/list/themes', {
@@ -33,9 +38,16 @@
           console.error('Ошибка при получении тем:', error);
         }
       });
+      const navigateBack = () => {
+        const url = window.location.href;
+        const id = url.split("/").pop();
+        location.href = `/theme/editor`;
+        localStorage.setItem('subjectId', id)
+    };
   
       return {
         themes,
+        navigateBack
       };
     },
   };
