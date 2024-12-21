@@ -9,6 +9,7 @@ import SubjectEditor from "@/components/SubjectEditor.vue";
 import Subject from "@/components/Subject.vue";
 import Theme from "@/components/Theme.vue";
 import ThemeEditor from "@/components/ThemeEditor.vue";
+import ThemeNode from "@/components/ThemeNode.vue";
 import Text from "@/components/Text.vue";
 import apiClient from '@/ApiClient.js';
 

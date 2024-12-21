@@ -41,8 +41,7 @@
       const navigateBack = () => {
         const url = window.location.href;
         const id = url.split("/").pop();
-        location.href = `/theme/editor`;
-        localStorage.setItem('subjectId', id)
+        location.href = `/theme/editor?subjects=${id}`;
     };
   
       return {
