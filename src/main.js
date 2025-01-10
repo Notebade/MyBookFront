@@ -3,6 +3,7 @@ import App from "@/App.vue";
 import { createRouter, createWebHistory } from "vue-router"; // Для Vue 3
 import Main from "@/components/Main.vue";
 import Login from "@/components/Login.vue";
+import Registration from "@/components/Registration.vue";
 import Discipline from "@/components/Discipline.vue";
 import DisciplineEditor from "@/components/DisciplineEditor.vue";
 import SubjectEditor from "@/components/SubjectEditor.vue";
@@ -22,6 +23,10 @@ const routes = [
   {
     path: "/login",
     component: Login,
+  },
+  {
+    path: "/registration",
+    component: Registration,
   },
   {
     path: "/discipline",
@@ -63,7 +68,7 @@ const routes = [
 
 const userData = localStorage.getItem('userData');
 const user = userData ? JSON.parse(userData) : null;
-if (user?.login == null && window.location.pathname !== '/login') {
+if (user?.login == null && window.location.pathname !== '/login' && window.location.pathname !== '/registration') {
   window.location.replace('/login');
 }
 

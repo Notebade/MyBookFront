@@ -1,7 +1,7 @@
 <template>
     <div class="login-container">
       <form @submit.prevent="handleLogin" class="login-form">
-        <h2>Login</h2>
+        <h2>Registration</h2>
         <div class="form-group">
           <label for="username">Username</label>
           <input
@@ -22,9 +22,50 @@
             required
           />
         </div>
-        <button type="submit" class="login-button">Login</button>
-        <br>
-        <button class="login-registre" :onclick="`location.href='/registration'`">Регистрация</button>
+
+        <div class="form-group">
+          <label for="firstName">Имя</label>
+          <input
+            type="text"
+            id="firstName"
+            v-model="firstName"
+            placeholder="Введите свое имя"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Фамилию</label>
+          <input
+            type="text"
+            id="lastName"
+            v-model="lastName"
+            placeholder="Введите свою фамилию"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Отчество</label>
+          <input
+            type="text"
+            id="middleName"
+            v-model="middleName"
+            placeholder="Введите свое отчество"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">email</label>
+          <input
+            type="text"
+            id="email"
+            v-model="email"
+            placeholder="Введите свой email"
+            required
+          />
+        </div>
+        <button type="submit" class="login-button">Регистрация</button>
       </form>
   
       <!-- Блок для отображения ответа -->
@@ -53,16 +94,28 @@
       return {
         username: "",
         password: "",
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        email: "",
         client: null,
         response: null,
         error: null,
       };
     },
     setup() {
-     const apiClient = inject("apiClient");
-      return {
+        const params = new URLSearchParams(window.location.search);
+        const apiClient = inject("apiClient");
+        const code = params.get('invate');
+        const info = apiClient.get('/user/zov?code=' + code);
+        const rights = info.rights ?? [{}];
+        const active = rights.length === 0 ? false : true;
+
+    return {
         apiClient: apiClient,
-      }
+        rights: rights,
+        active: active
+    };
     },
     methods: {
       async handleLogin() {
@@ -70,17 +123,25 @@
         this.error = null; // Сброс ошибки
         try {
           // Отправляем POST-запрос
-          const res = await this.apiClient.post("/user/logging", {
+          const res = await this.apiClient.post("/user/register", {
             login: this.username,
             password: this.password,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            middleName: this.middleName,
+            email: this.email,
+            rights: this.rights,
+            active: this.active
           },
         );
   
           // Проверяем статус ответа
           if (res.status === 200) {
             this.response = "Успешно!";
-            localStorage.setItem('userData', JSON.stringify(res.data, null, 2));
+        if (res.data.token) {
             window.location.replace('/');
+            localStorage.setItem('userData', JSON.stringify(res.data, null, 2));
+        }
           }
         } catch (err) {
           if (err.response && err.response.status === 404) {
