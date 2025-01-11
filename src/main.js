@@ -3,6 +3,7 @@ import App from "@/App.vue";
 import { createRouter, createWebHistory } from "vue-router"; // Для Vue 3
 import Main from "@/components/Main.vue";
 import Login from "@/components/Login.vue";
+import User from "@/components/User.vue";
 import Registration from "@/components/Registration.vue";
 import Discipline from "@/components/Discipline.vue";
 import DisciplineEditor from "@/components/DisciplineEditor.vue";
@@ -23,6 +24,10 @@ const routes = [
   {
     path: "/login",
     component: Login,
+  },
+  {
+    path: "/user",
+    component: User,
   },
   {
     path: "/registration",

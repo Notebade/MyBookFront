@@ -106,15 +106,11 @@
     setup() {
         const params = new URLSearchParams(window.location.search);
         const apiClient = inject("apiClient");
-        const code = params.get('invate');
-        const info = apiClient.get('/user/zov?code=' + code);
-        const rights = info.rights ?? [{}];
-        const active = rights.length === 0 ? false : true;
+        const code = params.get('invite');
 
     return {
         apiClient: apiClient,
-        rights: rights,
-        active: active
+        code: code,
     };
     },
     methods: {
@@ -123,6 +119,11 @@
         this.error = null; // Сброс ошибки
         try {
           // Отправляем POST-запрос
+          const info =  await this.apiClient.get('/user/zov?code=' + this.code);
+          console.log(info.info);
+          console.log(info.data);
+          console.log(info.data.info);
+          
           const res = await this.apiClient.post("/user/register", {
             login: this.username,
             password: this.password,
@@ -130,8 +131,9 @@
             lastName: this.lastName,
             middleName: this.middleName,
             email: this.email,
-            rights: this.rights,
-            active: this.active
+            rights: info.data.info.rights,
+            group: info.data.info.group,
+            active: info.data.info.rights.length === 0 ? false : true,
           },
         );
   
