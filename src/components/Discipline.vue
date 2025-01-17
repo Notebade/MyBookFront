@@ -13,6 +13,7 @@
     </nav>
   </header>
   <button 
+      v-if="hasAdminRights || hasTechearRights"
       class="btn navigate-btn" 
       :onclick="`location.href='/discipline/editor'`">
       Создать
@@ -32,7 +33,7 @@
   
   <div class="card-body">
     <div class="authors">
-      <p><strong>Authors:</strong></p>
+      <p><strong>Авторы:</strong></p>
       <ul>
         <li v-for="author in item.authors" :key="author.id">
           {{ author.fullName }}
@@ -48,6 +49,7 @@
   <!-- Блок кнопок -->
   <div class="card-footer">
     <button 
+      v-if="hasAdminRights || (hasTechearRights && authors.some(author => author.id === userData.id))"
       class="btn edit-btn" 
       :onclick="`location.href='/discipline/editor/${item.id}'`">
       Редактировать
@@ -70,6 +72,9 @@ import { inject, ref, onMounted } from 'vue';
 export default {
   setup() {
     const apiClient = inject("apiClient");
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const hasAdminRights = userData.rights.some(right => right.code === "admin");
+    const hasTechearRights = userData.rights.some(right => right.code === "teacher");
     const apiData = ref([]);  // Используем ref для реактивных данных
 
     const fetchData = async () => {
@@ -89,6 +94,9 @@ export default {
 
     return {
       apiData,
+      userData,
+      hasAdminRights,
+      hasTechearRights,
     };
   },
 };

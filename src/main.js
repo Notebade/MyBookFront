@@ -13,7 +13,15 @@ import Theme from "@/components/Theme.vue";
 import ThemeEditor from "@/components/ThemeEditor.vue";
 import ThemeNode from "@/components/ThemeNode.vue";
 import Text from "@/components/Text.vue";
+import Test from "@/components/Test.vue";
+import TestViev from "@/components/TestViev.vue";
 import apiClient from '@/ApiClient.js';
+
+const userData = localStorage.getItem('userData');
+const user = userData ? JSON.parse(userData) : null;
+if (user?.login == null && window.location.pathname !== '/login' && window.location.pathname !== '/registration') {
+  window.location.replace('/login');
+}
 
 // Определяем маршруты
 const routes = [
@@ -24,6 +32,14 @@ const routes = [
   {
     path: "/login",
     component: Login,
+  },
+  {
+    path: "/test",
+    component: Test,
+  },
+  {
+    path: "/test/:id",
+    component: TestViev,
   },
   {
     path: "/user",
@@ -71,11 +87,6 @@ const routes = [
   },
 ];
 
-const userData = localStorage.getItem('userData');
-const user = userData ? JSON.parse(userData) : null;
-if (user?.login == null && window.location.pathname !== '/login' && window.location.pathname !== '/registration') {
-  window.location.replace('/login');
-}
 
 
 // Создаем экземпляр маршрутизатора

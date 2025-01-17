@@ -6,19 +6,18 @@
       <nav>
         <ul class="menu">
           <li><router-link to="/">Главная</router-link></li>
-          <li><router-link to="/test">Тесты</router-link></li>
-          <li><router-link to="/practics">Практические</router-link></li>
           <li><router-link to="/user">Профиль</router-link></li>
         </ul>
       </nav>
     </header>
     <button 
-      v-if="hasAdminRights || hasTechearRights"
-      class="btn navigate-btn" 
-      :onclick="`location.href='/subject/editor'`">
-      Создать
-    </button>
+        v-if="hasAdminRights || hasTechearRights"
+        class="btn navigate-btn" 
+        :onclick="`location.href='/discipline/editor'`">
+        Создать
+      </button>
     <div class="cards-container">
+      <!-- Итерация по данным из API -->
       <div 
     v-for="item in apiData" 
     :key="item.id" 
@@ -27,35 +26,19 @@
     
     <div class="card-header">
       <h3>{{ item.name }}</h3>
-      <!--<p><strong>Code:</strong> {{ item.code }}</p>-->
-    </div>
-    
-    <div class="card-body">
-      <div class="authors">
-        <p><strong>Автор:</strong></p>
-        <ul>
-          <li>
-            {{ item.user.fullName }}
-          </li>
-        </ul>
-      </div>
-      <!-- Проверка наличия изображения и отображение -->
-      <div v-if="item.media">
-        <img :src="item.media.path" alt="media" class="media-image" />
-      </div>
     </div>
   
     <!-- Блок кнопок -->
     <div class="card-footer">
       <button 
+        v-if="hasAdminRights || (hasTechearRights && authors.some(author => author.id === userData.id))"
         class="btn edit-btn" 
-        v-if="hasAdminRights || (hasTechearRights && item.user === userData.id)"
-        :onclick="`location.href='/subject/editor/${item.id}'`">
+        :onclick="`location.href='/test/editor/${item.id}'`">
         Редактировать
       </button>
       <button 
         class="btn navigate-btn" 
-        :onclick="`location.href='/subject/${item.id}'`">
+        :onclick="`location.href='/test/${item.id}'`">
         Перейти
       </button>
     </div>
@@ -71,18 +54,25 @@
   export default {
     setup() {
       const apiClient = inject("apiClient");
-      const apiData = ref([]);  // Используем ref для реактивных данных
       const userData = JSON.parse(localStorage.getItem('userData'));
       const hasAdminRights = userData.rights.some(right => right.code === "admin");
       const hasTechearRights = userData.rights.some(right => right.code === "teacher");
+      const apiData = ref([]);  // Используем ref для реактивных данных
   
       const fetchData = async () => {
         try {
-            const url = window.location.href;
-            const lastParam = url.split("/").slice(-1)[0];
-          const res = await apiClient.post("/list/subjects", {
-            disciplineId: parseInt(lastParam)
-          });
+          const res = await apiClient.post("/list/tests");
+          if (res.status === 200) {
+            apiData.value = res.data; // Сохраняем данные в apiData
+          }
+        } catch (err) {
+          console.error("Error fetching data:", err);
+        }
+      };
+
+      const fetchDataSecond = async () => {
+        try {
+          const res = await apiClient.post("/list/result/test");
           if (res.status === 200) {
             apiData.value = res.data; // Сохраняем данные в apiData
           }
@@ -93,13 +83,14 @@
   
       onMounted(() => {
         fetchData(); // Получаем данные при монтировании компонента
+        fetchDataSecond();
       });
   
       return {
         apiData,
+        userData,
         hasAdminRights,
         hasTechearRights,
-        userData
       };
     },
   };

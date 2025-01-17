@@ -2,6 +2,7 @@
     <div class="container">
       <h1>Темы</h1>
       <button 
+      v-if="hasAdminRights || hasTechearRights"
       class="btn navigate-btn" 
       :onclick="navigateBack">
       Создать
@@ -22,6 +23,9 @@
   export default {
     setup() {
       const themes = ref([]); // Массив для хранения полученных тем
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      const hasAdminRights = userData.rights.some(right => right.code === "admin");
+      const hasTechearRights = userData.rights.some(right => right.code === "teacher");
   
       onMounted(async () => {
         try {
@@ -46,7 +50,10 @@
   
       return {
         themes,
-        navigateBack
+        navigateBack,
+        hasAdminRights,
+        hasTechearRights,
+        userData
       };
     },
   };
