@@ -1,131 +1,155 @@
 <template>
-  <div class="test" v-if="testData">
-    <h1>{{ testData.name }}</h1>
-    <div v-for="question in testData.questions" :key="question.id" class="question">
-      <p>{{ question.text }}</p>
+  <div class="test" v-if="testData || testResultData.length > 0">
+    <!-- Таймер -->
+    <div v-if="timer > 0" class="timer">Время осталось: {{ timer }} секунд</div>
 
-      <!-- Одиночный выбор (радиокнопки) -->
-      <div v-if="question.type.code === 'single'">
-        <div v-for="answer in question.answers" :key="answer.id">
-          <label>
-            <input
-              type="radio"
-              :name="'question-' + question.id"
-              :value="answer.id"
-              v-model="answers[question.id]"
-            />
-            {{ answer.text }}
-          </label>
-        </div>
-      </div>
-
-      <!-- Несколько вариантов выбора (чекбоксы) -->
-      <div v-if="question.type.code === 'multiple'">
-        <div v-for="answer in question.answers" :key="answer.id">
-          <label>
-            <input
-              type="checkbox"
-              :value="answer.id"
-              :name="'question-' + question.id"
-              v-model="answers[question.id]"
-            />
-            {{ answer.text }}
-          </label>
-        </div>
-      </div>
-
-      <!-- Ввод текста -->
-      <div v-if="question.type.code === 'textAria'">
-        <textarea v-model="answers[question.id]" placeholder="Введите ответ"></textarea>
-      </div>
+    <!-- Результаты теста -->
+    <div v-if="testResultData.length > 0 && !isRetesting">
+      <h2>Результаты предыдущего теста</h2>
+      <p>Оценка: {{ testResultData[0].score }}</p>
+      <p>Попыток: {{ testResultData[0].trail }}</p>
+      <p v-if="testResultData[0].score < 4">Ваша оценка ниже 4. Рекомендуется пройти тест повторно.</p>
+      <button v-if="testResultData[0].score < 4" @click="startRetest">Пройти тест повторно</button>
     </div>
 
-    <button @click="submitTest">Подтвердить ответы</button>
+    <!-- Вопросы -->
+    <div v-else-if="testData && (testResultData.length === 0 || isRetesting)">
+      <h1>{{ testData.name }}</h1>
+      <div v-for="question in testData.questions" :key="question.id" class="question">
+        <p>{{ question.text }}</p>
+
+        <!-- Одиночный выбор (радиокнопки) -->
+        <div v-if="question.type.code === 'single'">
+          <div v-for="answer in question.answers" :key="answer.id">
+            <label>
+              <input
+                type="radio"
+                :name="'question-' + question.id"
+                :value="answer.id"
+                v-model="answers[question.id]"
+              />
+              {{ answer.text }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Несколько вариантов выбора (чекбоксы) -->
+        <div v-if="question.type.code === 'multiple'">
+          <div v-for="answer in question.answers" :key="answer.id">
+            <label>
+              <input
+                type="checkbox"
+                :value="answer.id"
+                :name="'question-' + question.id"
+                v-model="answers[question.id]"
+              />
+              {{ answer.text }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Ввод текста -->
+        <div v-if="question.type.code === 'textAria'">
+          <textarea v-model="answers[question.id]" placeholder="Введите ответ"></textarea>
+        </div>
+      </div>
+
+      <button @click="submitTest">Подтвердить ответы</button>
+    </div>
   </div>
 
-  <!-- Можно также добавить индикатор загрузки, если данные ещё не загружены -->
+  <!-- Индикатор загрузки -->
   <div v-else>
     <p>Загрузка теста...</p>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, inject, onBeforeMount } from "vue";
+import { ref, onMounted, inject } from "vue";
 
 export default {
   setup() {
     const apiClient = inject("apiClient");
     const testData = ref(null);
-    const testResultData = ref(null);
+    const testResultData = ref([]);
     const answers = ref({});
+    const timer = ref(0);
+    const isRetesting = ref(false);
+    let timerInterval = null;
 
-    const questions = async () => {
+    const loadQuestions = async () => {
       try {
         const url = window.location.href;
         const lastParam = url.split("/").slice(-1)[0];
         const response = await apiClient.get("/test/" + lastParam);
-        testData.value = response.data; // Присваиваем данные теста
-        // Инициализация массива для каждого вопроса с множественным выбором
+        testData.value = response.data;
+        console.log("Данные теста загружены:", testData.value);
+
+        // Инициализация ответов
         testData.value.questions.forEach((question) => {
           if (question.type.code === "multiple") {
-            answers.value[question.id] = []; // Массив для множественного выбора
+            answers.value[question.id] = [];
           } else {
-            answers.value[question.id] = null; // Для одиночного выбора - строка
+            answers.value[question.id] = null;
           }
         });
+
+        // Установка таймера
+        timer.value = testData.value.questions.length * 60;
+        startTimer();
       } catch (error) {
-        console.error("Ошибка загрузки теста", error);
+        console.error("Ошибка загрузки вопросов", error);
       }
     };
 
-    const testResult = async () => {
+    const loadTestResult = async () => {
       try {
         const url = window.location.href;
         const lastParam = url.split("/").slice(-1)[0];
-        const response = await apiClient.post(
-          "list/result/test", 
-          {
-            test: {id: lastParam}
-          }
-      );
-      testResultData.value = response.data;
+        const response = await apiClient.post("list/result/test", {
+          test: { id: lastParam },
+        });
+        testResultData.value = response.data;
+        console.log("Результаты теста загружены:", testResultData.value);
       } catch (error) {
-        console.error("Ошибка загрузки теста", error);
+        console.error("Ошибка загрузки результатов теста", error);
       }
     };
 
-    // Загрузка данных теста с сервера
-    onMounted(async () => {
-      testResult();
-      questions();
-    });
+    const startTimer = () => {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (timer.value > 0) {
+      timer.value -= 1;
+    } else {
+      clearInterval(timerInterval);
+      console.log("Таймер истек, отправляем тест.");
+      submitTest(); // Отправка теста по завершении таймера
+    }
+  }, 1000);
+};
 
-    // Функция форматирования ответов
+    const startRetest = () => {
+      isRetesting.value = true;
+      loadQuestions();
+    };
+
     const formatAnswers = (source) => {
       const formattedAnswers = [];
-
       for (const key in source) {
         const value = source[key];
-
         if (Array.isArray(value)) {
-          // Если значение массив, добавляем объекты для каждого элемента массива
           value.forEach((item) => {
             formattedAnswers.push({ id: Number(item) });
           });
         } else if (value !== null) {
-          // Если значение одно число
           formattedAnswers.push({ id: Number(value) });
         }
       }
-
       return formattedAnswers;
     };
 
-    // Функция для обработки отправки ответов
     const submitTest = async () => {
-      console.log("Ответы на тест:", answers.value);
-      console.log(formatAnswers(answers.value)); // Теперь без использования this
-
       try {
         const url = window.location.href;
         const lastParam = url.split("/").slice(-1)[0];
@@ -133,18 +157,32 @@ export default {
           test: { id: lastParam },
           answers: formatAnswers(answers.value),
         });
-
         console.log("Результат отправки:", result.data);
+        clearInterval(timerInterval);
       } catch (error) {
         console.error("Ошибка отправки теста", error);
       }
     };
 
+    onMounted(async () => {
+      await loadTestResult();
+      console.log("Проверка результатов теста, загружено:", testResultData.value);
+      if (testResultData.value.length === 0) {
+        console.log("Результаты пусты, загружаем вопросы.");
+        await loadQuestions();
+      } else {
+        console.log("Результаты теста найдены, пропускаем загрузку вопросов.");
+      }
+    });
+
     return {
       testData,
-      answers,
-      submitTest,
       testResultData,
+      answers,
+      timer,
+      isRetesting,
+      submitTest,
+      startRetest,
     };
   },
 };
@@ -185,8 +223,9 @@ button:hover {
   background-color: #45a049;
 }
 
-.loading {
+.timer {
   text-align: center;
   font-size: 18px;
+  margin-bottom: 20px;
 }
 </style>

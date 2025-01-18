@@ -21,8 +21,7 @@
       <div 
     v-for="item in apiData" 
     :key="item.id" 
-    class="card" 
-    :title="item.description">
+    class="card">
     
     <div class="card-header">
       <h3>{{ item.name }}</h3>
