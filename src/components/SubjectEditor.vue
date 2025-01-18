@@ -30,6 +30,33 @@
           </select>
           <span v-if="errors.discipline" class="error">{{ errors.discipline }}</span>
         </div>
+
+        <div class="form-group">
+        <label>Классы</label>
+        <div class="multi-select">
+          <div class="multi-select-btn" @click="toggleDropdown">
+            {{ formData.groupsSelected.length > 0
+              ? formData.groupsSelected.map(group => group.name).join(', ')
+              : 'Выберите классы' }}
+            <span v-if="!formData.dropdownOpen">▼</span>
+            <span v-else>▲</span>
+          </div>
+          <div
+            class="multi-select-options"
+            :class="{ active: formData.dropdownOpen }"
+          >
+            <label v-for="group in formData.groups" :key="group.id">
+              <input
+                type="checkbox"
+                :value="group"
+                v-model="formData.groupsSelected"
+              />
+              {{ group.name}}
+            </label>
+          </div>
+        </div>
+      </div>
+
         <div class="form-group">
           <label for="description">Описание</label>
           <textarea
@@ -62,21 +89,37 @@ export default {
         discipline: "",
         description: "",
         disciplines: [],
+        groups: [],
+        groupsSelected: [],
+        dropdownOpen: false
       },
       errors: {},
     };
   },
   setup() {
+    const params = new URLSearchParams(window.location.search);
+    const disciplineId = params.get('discipline');
     const apiClient = inject("apiClient");
-    return { apiClient };
+    return { apiClient, disciplineId };
   },
   methods: {
+    toggleDropdown() {
+      this.formData.dropdownOpen = !this.formData.dropdownOpen;
+    },
     async fetchDisciplines() {
       try {
-        const response = await this.apiClient.post("/list/disciplines");
+        const response = await this.apiClient.post("/list/disciplines", {discipline: {id: this.disciplineId}});
         this.formData.disciplines = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке дисциплин:", error);
+      }
+    },
+    async fetchGroup() {
+      try {
+        const response = await this.apiClient.post("/list/groups");
+        this.formData.groups = response.data;
+      } catch (error) {
+        console.error("Ошибка при загрузке списка пользователей:", error);
       }
     },
     async loadMaterial() {
@@ -86,7 +129,8 @@ export default {
       if (!isNaN(id)) {
         try {
           const response = await this.apiClient.get(`/subject/${id}`);
-          this.formData = { ...response.data, disciplines: this.formData.disciplines };
+          this.formData = { ...response.data, disciplines: this.formData.disciplines, groups: this.formData.groups };
+          this.formData.groupsSelected = response.data.groups;
         } catch (error) {
           console.error("Ошибка при загрузке данных материала:", error);
           alert("Не удалось загрузить данные материала.");
@@ -119,6 +163,7 @@ export default {
       name: this.formData.name,
       discipline:  this.formData.discipline , // Отправляем дисциплину как объект
       description: this.formData.description,
+      groups: this.formData.groupsSelected,
       code: this.formData.id ? this.formData.code : this.generateCode(),
     };
 
@@ -151,6 +196,7 @@ export default {
     },
   },
   mounted() {
+    this.fetchGroup();
     this.fetchDisciplines();
     this.loadMaterial();
   },

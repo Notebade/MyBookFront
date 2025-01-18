@@ -15,7 +15,7 @@
     <button 
       v-if="hasAdminRights || hasTechearRights"
       class="btn navigate-btn" 
-      :onclick="`location.href='/subject/editor'`">
+      :onclick="navigateToEditor">
       Создать
     </button>
     <div class="cards-container">
@@ -75,6 +75,8 @@
       const userData = JSON.parse(localStorage.getItem('userData'));
       const hasAdminRights = userData.rights.some(right => right.code === "admin");
       const hasTechearRights = userData.rights.some(right => right.code === "teacher");
+      const url = window.location.href;
+      const disciplineId = url.split("/").slice(-1)[0];
   
       const fetchData = async () => {
         try {
@@ -99,9 +101,15 @@
         apiData,
         hasAdminRights,
         hasTechearRights,
-        userData
+        userData,
+        disciplineId
       };
     },
+    methods: {
+  navigateToEditor() {
+    location.href = `/subject/editor?discipline=${this.disciplineId}`;
+  }
+}
   };
   </script>
   

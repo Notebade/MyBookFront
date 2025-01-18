@@ -39,6 +39,32 @@
       </div>
 
       <div class="form-group">
+        <label>Классы</label>
+        <div class="multi-select">
+          <div class="multi-select-btn" @click="toggleDropdownSecond">
+            {{ formData.groupsSelected.length > 0
+              ? formData.groupsSelected.map(group => group.name).join(', ')
+              : 'Выберите классы' }}
+            <span v-if="!formData.dropdownOpenSecond">▼</span>
+            <span v-else>▲</span>
+          </div>
+          <div
+            class="multi-select-options"
+            :class="{ active: formData.dropdownOpenSecond }"
+          >
+            <label v-for="group in formData.groups" :key="group.id">
+              <input
+                type="checkbox"
+                :value="group"
+                v-model="formData.groupsSelected"
+              />
+              {{ group.name}}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label for="description">Описание</label>
         <textarea
           id="description"
@@ -74,6 +100,9 @@ export default {
         authorsSelected: [], // Выбранные авторы
         description: "", // Описание
         dropdownOpen: false, // Открыт ли выпадающий список
+        dropdownOpenSecond: false, // Открыт ли выпадающий список
+        groups: [],
+        groupsSelected: [], // Выбранные авторы
       },
     };
   },
@@ -86,6 +115,14 @@ export default {
       try {
         const response = await this.apiClient.post("/list/users");
         this.formData.authors = response.data;
+      } catch (error) {
+        console.error("Ошибка при загрузке списка пользователей:", error);
+      }
+    },
+    async fetchGroup() {
+      try {
+        const response = await this.apiClient.post("/list/groups");
+        this.formData.groups = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке списка пользователей:", error);
       }
@@ -110,6 +147,7 @@ export default {
         this.formData.name = response.data.name;
         this.formData.description = response.data.description;
         this.formData.authorsSelected = response.data.authors;
+        this.formData.groupsSelected = response.data.groups;
         this.formData.id = lastParam;
       } catch (error) {
         window.location.replace('/discipline');
@@ -118,6 +156,9 @@ export default {
     toggleDropdown() {
       this.formData.dropdownOpen = !this.formData.dropdownOpen;
     },
+    toggleDropdownSecond() {
+      this.formData.dropdownOpenSecond = !this.formData.dropdownOpenSecond;
+    },
     async handleSubmit() {
       if(!Number.isInteger(parseInt(this.formData.id))) {
       try {
@@ -125,6 +166,7 @@ export default {
           name: this.formData.name,
           description: this.formData.description,
           authors: this.formData.authorsSelected,
+          groups: this.formData.groupsSelected,
           code: this.formData.code,
         });
         if (response.status === 201) {
@@ -139,6 +181,7 @@ export default {
           name: this.formData.name,
           description: this.formData.description,
           authors: this.formData.authorsSelected,
+          groups: this.formData.groupsSelected,
           code: this.formData.code,
         });
         if (response.status === 200) {
@@ -151,6 +194,7 @@ export default {
   },
   mounted() {
     this.fetchUsers();
+    this.fetchGroup();
     const url = window.location.href;
     const lastParam = url.split("/").slice(-1)[0];
     if (Number.isInteger(parseInt(lastParam))) {
