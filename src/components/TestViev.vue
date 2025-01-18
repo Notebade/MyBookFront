@@ -50,22 +50,24 @@
 </template>
 
 <script>
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, onBeforeMount } from "vue";
 
 export default {
   setup() {
-    const apiClient = inject("apiClient"); // Inject your API client
-    const testData = ref(null); // Сначала null, пока не загрузим данные
-    const answers = ref({}); // Массив для хранения ответов
+    const apiClient = inject("apiClient");
+    const testData = ref(null);
+    const testResultData = ref(null);
+    const answers = ref({});
 
-    // Загрузка данных теста с сервера
-    onMounted(async () => {
+    const questions = async () => {
       try {
-        const response = await apiClient.get("/test/1");
+        const url = window.location.href;
+        const lastParam = url.split("/").slice(-1)[0];
+        const response = await apiClient.get("/test/" + lastParam);
         testData.value = response.data; // Присваиваем данные теста
         // Инициализация массива для каждого вопроса с множественным выбором
-        testData.value.questions.forEach(question => {
-          if (question.type.code === 'multiple') {
+        testData.value.questions.forEach((question) => {
+          if (question.type.code === "multiple") {
             answers.value[question.id] = []; // Массив для множественного выбора
           } else {
             answers.value[question.id] = null; // Для одиночного выбора - строка
@@ -74,18 +76,75 @@ export default {
       } catch (error) {
         console.error("Ошибка загрузки теста", error);
       }
+    };
+
+    const testResult = async () => {
+      try {
+        const url = window.location.href;
+        const lastParam = url.split("/").slice(-1)[0];
+        const response = await apiClient.post(
+          "list/result/test", 
+          {
+            test: {id: lastParam}
+          }
+      );
+      testResultData.value = response.data;
+      } catch (error) {
+        console.error("Ошибка загрузки теста", error);
+      }
+    };
+
+    // Загрузка данных теста с сервера
+    onMounted(async () => {
+      testResult();
+      questions();
     });
 
+    // Функция форматирования ответов
+    const formatAnswers = (source) => {
+      const formattedAnswers = [];
+
+      for (const key in source) {
+        const value = source[key];
+
+        if (Array.isArray(value)) {
+          // Если значение массив, добавляем объекты для каждого элемента массива
+          value.forEach((item) => {
+            formattedAnswers.push({ id: Number(item) });
+          });
+        } else if (value !== null) {
+          // Если значение одно число
+          formattedAnswers.push({ id: Number(value) });
+        }
+      }
+
+      return formattedAnswers;
+    };
+
     // Функция для обработки отправки ответов
-    const submitTest = () => {
+    const submitTest = async () => {
       console.log("Ответы на тест:", answers.value);
-      // Здесь можно отправить ответы на сервер для проверки
+      console.log(formatAnswers(answers.value)); // Теперь без использования this
+
+      try {
+        const url = window.location.href;
+        const lastParam = url.split("/").slice(-1)[0];
+        const result = await apiClient.post("user/test", {
+          test: { id: lastParam },
+          answers: formatAnswers(answers.value),
+        });
+
+        console.log("Результат отправки:", result.data);
+      } catch (error) {
+        console.error("Ошибка отправки теста", error);
+      }
     };
 
     return {
       testData,
       answers,
       submitTest,
+      testResultData,
     };
   },
 };
