@@ -51,6 +51,9 @@
             {{ isEditing ? 'Сохранить изменения' : 'Создать тест' }}
           </button>
         </div>
+        <div class="form-group" v-if="isEditing">
+          <button @click="deleteItem" type="button" class="delete-button">Удалить</button>
+        </div>
       </form>
     </div>
   </template>
@@ -75,7 +78,7 @@
       });
   
       const isEditing = ref(false);
-
+  
       const url = window.location.href;
       const testId = url.split("/").pop();
       if (testId) {
@@ -117,7 +120,7 @@
           console.error("Ошибка загрузки тем:", error);
         }
       };
-
+  
       const getTheme = async (themeId) => {
         if (!themeId) return;
         try {
@@ -128,7 +131,7 @@
           console.error("Ошибка загрузки тем:", error);
         }
       };
-
+  
       const getSubjects = async (subjectId) => {
         if (!subjectId) return;
         try {
@@ -139,7 +142,7 @@
           console.error("Ошибка загрузки тем:", error);
         }
       };
-
+  
       const getDiscipline = async (disciplineId) => {
         if (!disciplineId) return;
         try {
@@ -156,9 +159,9 @@
         try {
           const response = await apiClient.get(`/test/${testId}`);
           Object.assign(test.value, response.data);
-          await getTheme(response.data.theme.id)
-          await getSubjects(response.data.theme.subjectId)
-          await getDiscipline(subjects.value[0].discipline.id)
+          await getTheme(response.data.theme.id);
+          await getSubjects(response.data.theme.subjectId);
+          await getDiscipline(subjects.value[0].discipline.id);
         } catch (error) {
           console.error("Ошибка загрузки теста:", error);
         }
@@ -170,20 +173,31 @@
             await apiClient.post(`/test/${testId}`, {
               ...test.value,
               theme: {
-                id: selectedTheme.value
-            }, 
+                id: selectedTheme.value,
+              },
             });
           } else {
             await apiClient.post("/test", {
               ...test.value,
               theme: {
-                id: selectedTheme.value
-            }, 
+                id: selectedTheme.value,
+              },
             });
           }
           alert(isEditing.value ? "Тест обновлён" : "Тест создан");
         } catch (error) {
           console.error("Ошибка сохранения теста:", error);
+        }
+      };
+  
+      const deleteItem = async () => {
+        try {
+          if (confirm('Вы уверены, что хотите удалить этот тест?')) {
+            await apiClient.delete(`/test/${testId}`);
+            alert("Тест удалён");
+          }
+        } catch (error) {
+          console.error("Ошибка удаления теста:", error);
         }
       };
   
@@ -216,12 +230,28 @@
         fetchSubjects,
         fetchThemes,
         isFormValid,
+        deleteItem,
       };
     },
   };
   </script>
   
   <style>
+  .delete-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .delete-button:hover {
+    background-color: #ff1a1a;
+  }
+  
   .form-container {
     max-width: 500px;
     margin: 50px auto;
