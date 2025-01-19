@@ -15,6 +15,7 @@ import ThemeNode from "@/components/ThemeNode.vue";
 import Text from "@/components/Text.vue";
 import Test from "@/components/Test.vue";
 import TestViev from "@/components/TestViev.vue";
+import TestEditor from "@/components/TestEditor.vue";
 import apiClient from '@/ApiClient.js';
 
 const userData = localStorage.getItem('userData');
@@ -40,6 +41,14 @@ const routes = [
   {
     path: "/test/:id",
     component: TestViev,
+  },
+  {
+    path: "/test/editor/:id",
+    component: TestEditor,
+  },
+  {
+    path: "/test/editor/",
+    component: TestEditor,
   },
   {
     path: "/user",

@@ -13,7 +13,7 @@
     <button 
         v-if="hasAdminRights || hasTechearRights"
         class="btn navigate-btn" 
-        :onclick="`location.href='/discipline/editor'`">
+        :onclick="`location.href='/test/editor'`">
         Создать
       </button>
     <div class="cards-container">

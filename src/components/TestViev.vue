@@ -1,7 +1,7 @@
 <template>
-  <div class="test" v-if="testData || testResultData.length > 0">
+  <div class="test">
     <!-- Таймер -->
-    <div v-if="timer > 0" class="timer">Время осталось: {{ timer }} секунд</div>
+    <div v-if="isRetesting && timer > 0" class="timer">Время осталось: {{ timer }} секунд</div>
 
     <!-- Результаты теста -->
     <div v-if="testResultData.length > 0 && !isRetesting">
@@ -10,6 +10,14 @@
       <p>Попыток: {{ testResultData[0].trail }}</p>
       <p v-if="testResultData[0].score < 4">Ваша оценка ниже 4. Рекомендуется пройти тест повторно.</p>
       <button v-if="testResultData[0].score < 4" @click="startRetest">Пройти тест повторно</button>
+    </div>
+
+    <div v-if="testResultData.length == 0 && !isRetesting">
+      <h2>Результаты предыдущего теста</h2>
+      <p>Оценка: не оценено</p>
+      <p>Попыток: нет</p>
+      <p>Рекомендуется пройти тест.</p>
+      <button @click="startRetest">Пройти тест</button>
     </div>
 
     <!-- Вопросы -->
@@ -59,9 +67,7 @@
   </div>
 
   <!-- Индикатор загрузки -->
-  <div v-else>
-    <p>Загрузка теста...</p>
-  </div>
+
 </template>
 
 <script>
@@ -166,13 +172,6 @@ export default {
 
     onMounted(async () => {
       await loadTestResult();
-      console.log("Проверка результатов теста, загружено:", testResultData.value);
-      if (testResultData.value.length === 0) {
-        console.log("Результаты пусты, загружаем вопросы.");
-        await loadQuestions();
-      } else {
-        console.log("Результаты теста найдены, пропускаем загрузку вопросов.");
-      }
     });
 
     return {
