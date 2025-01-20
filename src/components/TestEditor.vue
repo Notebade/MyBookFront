@@ -60,7 +60,7 @@
     </div>
   </div>
   <div class="form-container">
-    <h1>{{ isQuestion ? 'Редактировать тест' : 'Вопросы' }}</h1>
+    <h1 v-if="isQuestion">{{ isQuestion ? 'Редактировать Вопросы' : 'Вопросы' }}</h1>
     <form @submit.prevent="saveQuestions" class="test-form">
       <div v-for="(formElement, index) in formElements" :key="index">
         <div class="form-group">
@@ -77,8 +77,8 @@
         </div>
         <div class="form-group">
           <label :for="'number' + index">кол-во вариантов</label>
-          <input @change="updateCountAnswers($event.target.value)" value="4" type="number" :id="'number' + index"
-            required class="form-input" />
+          <input @change="updateCountAnswers($event.target.value)" :value="formElement.answers.length || 4"
+            type="number" :id="'number' + index" required class="form-input" />
         </div>
         <div style="border: 1px black;
             padding: 10px;
@@ -95,11 +95,13 @@
             </div>
           </div>
         </div>
+        <div class="form-group">
+          <button @click="deleteAnswers(index)">Удалить вопрос</button>
+        </div>
       </div>
-      <pre>{{ formElements }}</pre>
       <div class="form-group">
-      <button @click="saveQuestions">Сохранить вопросы</button>
-    </div>
+        <button v-if="formElements.length > 0">Сохранить вопросы</button>
+      </div>
     </form>
   </div>
 </template>
@@ -140,6 +142,7 @@ export default {
       answers.value.push(cloneDeep(answer));
     }
     const initialQuestion = {
+      id: null,
       test: { id: !isNaN(testId) ? testId : null },
       text: "",
       type: { id: null },
@@ -149,6 +152,7 @@ export default {
 
     const isEditing = ref(false);
     const isQuestion = ref(false);
+    const isQuestionDelete = ref(false);
 
     if (!isNaN(testId)) {
       isEditing.value = true;
@@ -237,7 +241,11 @@ export default {
       if (!testId) return;
       try {
         const response = await apiClient.get(`/test/${testId}`);
+        if (questionTypes.value.length == 0) {
+          await fetchQuestionTypes();
+        }
         Object.assign(test.value, response.data);
+        Object.assign(formElements.value, response.data.questions);
         await getTheme(response.data.theme.id);
         await getSubjects(response.data.theme.subjectId);
         await getDiscipline(subjects.value[0].discipline.id);
@@ -248,15 +256,16 @@ export default {
 
     const handleSubmit = async () => {
       try {
+        let result;
         if (isEditing.value && !isNaN(testId)) {
-          const result = await apiClient.post(`/test/${testId}`, {
+          result = await apiClient.post(`/test/${testId}`, {
             ...test.value,
             theme: {
               id: selectedTheme.value,
             },
           });
         } else {
-          const result = await apiClient.post("/test", {
+          result = await apiClient.post("/test", {
             ...test.value,
             theme: {
               id: selectedTheme.value,
@@ -264,14 +273,31 @@ export default {
           });
         }
         alert(isEditing.value ? "Тест обновлён" : "Тест создан");
-        window.location.replace(`/test/editor/`+ result.data.id);
+        window.location.replace(`/test/editor/` + result.data.id);
       } catch (error) {
         console.error("Ошибка сохранения теста:", error);
       }
     };
 
     const saveQuestions = async () => {
+      try {
+        let result;
+        if (isEditing.value && !isNaN(testId)) {
+          result = await apiClient.delete(`/test/${testId}/questions/clear`);
+        }
+        console.log(formElements.value);
+        const requests = formElements.value.map((formElement) =>
+            apiClient.post("/questions", { ...formElement, test: {id:testId}})
+          );
+        alert("Вопросы добавлены");
+      } catch (error) {
+        console.error("Ошибка:", error);
+      }
+    };
 
+    const deleteAnswers = async (key) => {
+      key--; //todo костыль 
+      formElements.value = formElements.value.filter((_, index) => index !== key);
     };
 
     const deleteItem = async () => {
@@ -345,6 +371,8 @@ export default {
       updateCountAnswers,
       steep,
       answer,
+      deleteAnswers,
+      isQuestionDelete,
     };
   },
 };
