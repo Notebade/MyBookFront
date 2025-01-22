@@ -83,8 +83,10 @@ const routes = [
     component: Text,
   },
 ];
-
-const hasRequiredRights = user.rights.some(right => ['admin', 'teacher'].includes(right.code));
+let hasRequiredRights = false
+if(user != null) {
+  hasRequiredRights = user.rights.some(right => ['admin', 'teacher'].includes(right.code));
+}
 
 if(hasRequiredRights) {
   routes.push(
@@ -118,8 +120,11 @@ if(hasRequiredRights) {
     },
   );
 }
+let hashAdmin = false
+if(user != null) {
+  const hashAdmin = user.rights.some(right => ['admin'].includes(right.code));
+}
 
-const hashAdmin = user.rights.some(right => ['admin'].includes(right.code));
 if(hasRequiredRights) {
   routes.push(
     {
