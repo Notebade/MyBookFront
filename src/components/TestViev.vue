@@ -165,6 +165,7 @@ export default {
         });
         console.log("Результат отправки:", result.data);
         clearInterval(timerInterval);
+        window.location.reload();
       } catch (error) {
         console.error("Ошибка отправки теста", error);
       }

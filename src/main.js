@@ -16,6 +16,7 @@ import Text from "@/components/Text.vue";
 import Test from "@/components/Test.vue";
 import TestViev from "@/components/TestViev.vue";
 import TestEditor from "@/components/TestEditor.vue";
+import Admin from "@/components/Admin.vue";
 import apiClient from '@/ApiClient.js';
 
 const userData = localStorage.getItem('userData');
@@ -23,6 +24,21 @@ const user = userData ? JSON.parse(userData) : null;
 if (user?.login == null && window.location.pathname !== '/login' && window.location.pathname !== '/registration') {
   window.location.replace('/login');
 }
+
+if(user != null) {
+  try {
+  const res = await apiClient.post("/user/auth/check", {
+    token: user.token
+  });
+  if (res.status === 200) {
+    localStorage.setItem('userData', JSON.stringify(res.data, null, 2));
+  }
+} catch (err) {
+  localStorage.setItem('userData', null);
+  window.location.replace('/login')
+}
+}
+
 
 // Определяем маршруты
 const routes = [
@@ -43,14 +59,6 @@ const routes = [
     component: TestViev,
   },
   {
-    path: "/test/editor/:id",
-    component: TestEditor,
-  },
-  {
-    path: "/test/editor/",
-    component: TestEditor,
-  },
-  {
     path: "/user",
     component: User,
   },
@@ -63,32 +71,12 @@ const routes = [
     component: Discipline,
   },
   {
-    path: "/discipline/editor",
-    component: DisciplineEditor,
-  },
-  {
-    path: "/discipline/editor/:id",
-    component: DisciplineEditor,
-  },
-  {
     path: "/discipline/:id",
     component: Subject,
   },
   {
-    path: "/subject/editor",
-    component: SubjectEditor,
-  },
-  {
-    path: "/subject/editor/:id",
-    component: SubjectEditor,
-  },
-  {
     path: "/subject/:id",
     component: Theme,
-  },
-  {
-    path: "/theme/editor",
-    component: ThemeEditor,
   },
   {
     path: "/theme/:id",
@@ -96,6 +84,50 @@ const routes = [
   },
 ];
 
+const hasRequiredRights = user.rights.some(right => ['admin', 'teacher'].includes(right.code));
+
+if(hasRequiredRights) {
+  routes.push(
+    {
+      path: "/theme/editor",
+      component: ThemeEditor,
+    },
+    {
+      path: "/subject/editor",
+      component: SubjectEditor,
+    },
+    {
+      path: "/subject/editor/:id",
+      component: SubjectEditor,
+    },
+    {
+      path: "/discipline/editor",
+      component: DisciplineEditor,
+    },
+    {
+      path: "/discipline/editor/:id",
+      component: DisciplineEditor,
+    },
+    {
+      path: "/test/editor/:id",
+      component: TestEditor,
+    },
+    {
+      path: "/test/editor/",
+      component: TestEditor,
+    },
+  );
+}
+
+const hashAdmin = user.rights.some(right => ['admin'].includes(right.code));
+if(hasRequiredRights) {
+  routes.push(
+    {
+      path: "/admin",
+      component: Admin,
+    },
+  );
+}
 
 
 // Создаем экземпляр маршрутизатора
