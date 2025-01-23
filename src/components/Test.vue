@@ -1,15 +1,5 @@
 <template>
-  <header class="header">
-    <div class="logo">
-      <h1>My App</h1>
-    </div>
-    <nav>
-      <ul class="menu">
-        <li><router-link to="/">Главная</router-link></li>
-        <li><router-link to="/user">Профиль</router-link></li>
-      </ul>
-    </nav>
-  </header>
+
   <button v-if="hasAdminRights || hasTechearRights" class="btn navigate-btn" :onclick="`location.href='/test/editor'`">
     Создать
   </button>
@@ -51,17 +41,6 @@ export default {
     const fetchData = async () => {
       try {
         const res = await apiClient.post("/list/tests");
-        if (res.status === 200) {
-          apiData.value = res.data; // Сохраняем данные в apiData
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
-
-    const fetchDataSecond = async () => {
-      try {
-        const res = await apiClient.post("/list/result/test");
         if (res.status === 200) {
           apiData.value = res.data; // Сохраняем данные в apiData
         }

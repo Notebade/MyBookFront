@@ -17,6 +17,7 @@ import Test from "@/components/Test.vue";
 import TestViev from "@/components/TestViev.vue";
 import TestEditor from "@/components/TestEditor.vue";
 import Admin from "@/components/Admin.vue";
+import Navigation from '@/components/Navigation.vue';
 import apiClient from '@/ApiClient.js';
 
 const userData = localStorage.getItem('userData');
@@ -45,6 +46,8 @@ const routes = [
   {
     path: "/",
     component: Main,
+    name: 'Главная',
+    meta: { showInNav: true },
   },
   {
     path: "/login",
@@ -53,6 +56,8 @@ const routes = [
   {
     path: "/test",
     component: Test,
+    name: 'Тесты',
+    meta: { showInNav: true },
   },
   {
     path: "/test/:id",
@@ -61,6 +66,8 @@ const routes = [
   {
     path: "/user",
     component: User,
+    name: 'Пользователь',
+    meta: { showInNav: true },
   },
   {
     path: "/registration",
@@ -69,6 +76,8 @@ const routes = [
   {
     path: "/discipline",
     component: Discipline,
+    name: 'Дисциплины',
+    meta: { showInNav: true },
   },
   {
     path: "/discipline/:id",

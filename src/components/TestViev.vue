@@ -30,12 +30,7 @@
         <div v-if="question.type.code === 'single'">
           <div v-for="answer in question.answers" :key="answer.id">
             <label>
-              <input
-                type="radio"
-                :name="'question-' + question.id"
-                :value="answer.id"
-                v-model="answers[question.id]"
-              />
+              <input type="radio" :name="'question-' + question.id" :value="answer.id" v-model="answers[question.id]" />
               {{ answer.text }}
             </label>
           </div>
@@ -45,12 +40,8 @@
         <div v-if="question.type.code === 'multiple'">
           <div v-for="answer in question.answers" :key="answer.id">
             <label>
-              <input
-                type="checkbox"
-                :value="answer.id"
-                :name="'question-' + question.id"
-                v-model="answers[question.id]"
-              />
+              <input type="checkbox" :value="answer.id" :name="'question-' + question.id"
+                v-model="answers[question.id]" />
               {{ answer.text }}
             </label>
           </div>
@@ -123,17 +114,17 @@ export default {
     };
 
     const startTimer = () => {
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    if (timer.value > 0) {
-      timer.value -= 1;
-    } else {
       clearInterval(timerInterval);
-      console.log("Таймер истек, отправляем тест.");
-      submitTest(); // Отправка теста по завершении таймера
-    }
-  }, 1000);
-};
+      timerInterval = setInterval(() => {
+        if (timer.value > 0) {
+          timer.value -= 1;
+        } else {
+          clearInterval(timerInterval);
+          console.log("Таймер истек, отправляем тест.");
+          submitTest(); // Отправка теста по завершении таймера
+        }
+      }, 1000);
+    };
 
     const startRetest = () => {
       isRetesting.value = true;

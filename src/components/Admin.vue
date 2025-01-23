@@ -468,7 +468,6 @@ body {
     font-size: 14px;
     color: #555;
 }
-
 /* Стили для группы элементов */
 .form-group {
     margin-bottom: 20px;

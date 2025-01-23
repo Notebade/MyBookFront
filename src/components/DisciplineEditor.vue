@@ -4,12 +4,7 @@
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="discipline-name">Название дисциплины</label>
-        <input
-          type="text"
-          id="discipline-name"
-          v-model="formData.name"
-          placeholder="Введите название дисциплины"
-        />
+        <input type="text" id="discipline-name" v-model="formData.name" placeholder="Введите название дисциплины" />
       </div>
 
       <div class="form-group">
@@ -22,16 +17,9 @@
             <span v-if="!formData.dropdownOpen">▼</span>
             <span v-else>▲</span>
           </div>
-          <div
-            class="multi-select-options"
-            :class="{ active: formData.dropdownOpen }"
-          >
+          <div class="multi-select-options" :class="{ active: formData.dropdownOpen }">
             <label v-for="author in formData.authors" :key="author.id">
-              <input
-                type="checkbox"
-                :value="author"
-                v-model="formData.authorsSelected"
-              />
+              <input type="checkbox" :value="author" v-model="formData.authorsSelected" />
               {{ author.fullName ?? author.login }}
             </label>
           </div>
@@ -48,17 +36,10 @@
             <span v-if="!formData.dropdownOpenSecond">▼</span>
             <span v-else>▲</span>
           </div>
-          <div
-            class="multi-select-options"
-            :class="{ active: formData.dropdownOpenSecond }"
-          >
+          <div class="multi-select-options" :class="{ active: formData.dropdownOpenSecond }">
             <label v-for="group in formData.groups" :key="group.id">
-              <input
-                type="checkbox"
-                :value="group"
-                v-model="formData.groupsSelected"
-              />
-              {{ group.name}}
+              <input type="checkbox" :value="group" v-model="formData.groupsSelected" />
+              {{ group.name }}
             </label>
           </div>
         </div>
@@ -66,21 +47,14 @@
 
       <div class="form-group">
         <label for="description">Описание</label>
-        <textarea
-          id="description"
-          v-model="formData.description"
-          placeholder="Введите описание дисциплины"
-        ></textarea>
+        <textarea id="description" v-model="formData.description" placeholder="Введите описание дисциплины"></textarea>
       </div>
 
       <div class="form-group">
         <button type="submit">Создать</button>
       </div>
       <div class="form-group">
-        <button type="button"
-    @click="handleDelete"
-    v-if="formData.id"
-    class="delete-button">Удалить</button>
+        <button type="button" @click="handleDelete" v-if="formData.id" class="delete-button">Удалить</button>
       </div>
     </form>
   </div>
@@ -128,19 +102,19 @@ export default {
       }
     },
     async handleDelete() {
-    if (!confirm("Вы уверены, что хотите удалить дисциплину?")) return;
+      if (!confirm("Вы уверены, что хотите удалить дисциплину?")) return;
 
-    try {
-      const response = await this.apiClient.delete(`/discipline/${this.formData.id}`);
-      if (response.status === 200) {
-        alert("Дисциплина успешно удалена.");
-        window.location.replace('/discipline');
+      try {
+        const response = await this.apiClient.delete(`/discipline/${this.formData.id}`);
+        if (response.status === 200) {
+          alert("Дисциплина успешно удалена.");
+          window.location.replace('/discipline');
+        }
+      } catch (error) {
+        alert("Ошибка при удалении дисциплины.");
+        console.error(error);
       }
-    } catch (error) {
-      alert("Ошибка при удалении дисциплины.");
-      console.error(error);
-    }
-  },
+    },
     async disciplineLoad(lastParam) {
       try {
         const response = await this.apiClient.get(`/discipline/${lastParam}`);
@@ -160,21 +134,21 @@ export default {
       this.formData.dropdownOpenSecond = !this.formData.dropdownOpenSecond;
     },
     async handleSubmit() {
-      if(!Number.isInteger(parseInt(this.formData.id))) {
-      try {
-        const response = await this.apiClient.post('/discipline', {
-          name: this.formData.name,
-          description: this.formData.description,
-          authors: this.formData.authorsSelected,
-          groups: this.formData.groupsSelected,
-          code: this.formData.code,
-        });
-        if (response.status === 201) {
-          window.location.replace('/discipline');
+      if (!Number.isInteger(parseInt(this.formData.id))) {
+        try {
+          const response = await this.apiClient.post('/discipline', {
+            name: this.formData.name,
+            description: this.formData.description,
+            authors: this.formData.authorsSelected,
+            groups: this.formData.groupsSelected,
+            code: this.formData.code,
+          });
+          if (response.status === 201) {
+            window.location.replace('/discipline');
+          }
+        } catch (error) {
+          alert("Что-то пошло не так");
         }
-      } catch (error) {
-        alert("Что-то пошло не так");
-      }
       }
       try {
         const response = await this.apiClient.put(`/discipline/${this.formData.id}`, {
@@ -291,6 +265,7 @@ export default {
 .form-group button:hover {
   background-color: #218838;
 }
+
 .delete-button {
   background-color: #dc3545;
   color: #fff;

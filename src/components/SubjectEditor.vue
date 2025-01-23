@@ -5,26 +5,14 @@
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="material-name">Название материала</label>
-          <input
-            type="text"
-            id="material-name"
-            v-model="formData.name"
-            placeholder="Введите название материала"
-          />
+          <input type="text" id="material-name" v-model="formData.name" placeholder="Введите название материала" />
           <span v-if="errors.name" class="error">{{ errors.name }}</span>
         </div>
         <div class="form-group">
           <label for="discipline-select">Выберите дисциплину</label>
-          <select
-            id="discipline-select"
-            v-model="formData.discipline"
-          >
+          <select id="discipline-select" v-model="formData.discipline">
             <option value="" disabled>Выберите дисциплину</option>
-            <option
-              v-for="discipline in formData.disciplines"
-              :key="discipline"
-              :value="discipline"
-            >
+            <option v-for="discipline in formData.disciplines" :key="discipline" :value="discipline">
               {{ discipline.name }}
             </option>
           </select>
@@ -32,38 +20,27 @@
         </div>
 
         <div class="form-group">
-        <label>Классы</label>
-        <div class="multi-select">
-          <div class="multi-select-btn" @click="toggleDropdown">
-            {{ formData.groupsSelected.length > 0
-              ? formData.groupsSelected.map(group => group.name).join(', ')
-              : 'Выберите классы' }}
-            <span v-if="!formData.dropdownOpen">▼</span>
-            <span v-else>▲</span>
-          </div>
-          <div
-            class="multi-select-options"
-            :class="{ active: formData.dropdownOpen }"
-          >
-            <label v-for="group in formData.groups" :key="group.id">
-              <input
-                type="checkbox"
-                :value="group"
-                v-model="formData.groupsSelected"
-              />
-              {{ group.name}}
-            </label>
+          <label>Классы</label>
+          <div class="multi-select">
+            <div class="multi-select-btn" @click="toggleDropdown">
+              {{ formData.groupsSelected.length > 0
+                ? formData.groupsSelected.map(group => group.name).join(', ')
+                : 'Выберите классы' }}
+              <span v-if="!formData.dropdownOpen">▼</span>
+              <span v-else>▲</span>
+            </div>
+            <div class="multi-select-options" :class="{ active: formData.dropdownOpen }">
+              <label v-for="group in formData.groups" :key="group.id">
+                <input type="checkbox" :value="group" v-model="formData.groupsSelected" />
+                {{ group.name }}
+              </label>
+            </div>
           </div>
         </div>
-      </div>
 
         <div class="form-group">
           <label for="description">Описание</label>
-          <textarea
-            id="description"
-            v-model="formData.description"
-            placeholder="Введите описание материала"
-          ></textarea>
+          <textarea id="description" v-model="formData.description" placeholder="Введите описание материала"></textarea>
           <span v-if="errors.description" class="error">{{ errors.description }}</span>
         </div>
         <div class="form-group">
@@ -108,7 +85,7 @@ export default {
     },
     async fetchDisciplines() {
       try {
-        const response = await this.apiClient.post("/list/disciplines", {discipline: {id: this.disciplineId}});
+        const response = await this.apiClient.post("/list/disciplines", { discipline: { id: this.disciplineId } });
         this.formData.disciplines = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке дисциплин:", error);
@@ -155,30 +132,30 @@ export default {
     },
     async handleSubmit() {
       if (!this.validateForm()) {
-    return;
-  }
+        return;
+      }
 
-  try {
-    const payload = {
-      name: this.formData.name,
-      discipline:  this.formData.discipline , // Отправляем дисциплину как объект
-      description: this.formData.description,
-      groups: this.formData.groupsSelected,
-      code: this.formData.id ? this.formData.code : this.generateCode(),
-    };
+      try {
+        const payload = {
+          name: this.formData.name,
+          discipline: this.formData.discipline, // Отправляем дисциплину как объект
+          description: this.formData.description,
+          groups: this.formData.groupsSelected,
+          code: this.formData.id ? this.formData.code : this.generateCode(),
+        };
 
-    const response = this.formData.id
-      ? await this.apiClient.put(`/subject/${this.formData.id}`, payload)
-      : await this.apiClient.post("/subject", payload);
+        const response = this.formData.id
+          ? await this.apiClient.put(`/subject/${this.formData.id}`, payload)
+          : await this.apiClient.post("/subject", payload);
 
-    if ([200, 201].includes(response.status)) {
-      alert("Учебное пособие сохранено.");
-      window.location.replace(`/discipline/${this.formData.discipline.id}`);
-    }
-  } catch (error) {
-    console.error("Ошибка при сохранении учебного пособия:", error);
-    alert("Произошла ошибка при сохранении. Попробуйте снова.");
-  }
+        if ([200, 201].includes(response.status)) {
+          alert("Учебное пособие сохранено.");
+          window.location.replace(`/discipline/${this.formData.discipline.id}`);
+        }
+      } catch (error) {
+        console.error("Ошибка при сохранении учебного пособия:", error);
+        alert("Произошла ошибка при сохранении. Попробуйте снова.");
+      }
     },
     async handleDelete() {
       if (confirm("Вы уверены, что хотите удалить это учебное пособие?")) {

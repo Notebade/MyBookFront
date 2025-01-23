@@ -3,31 +3,16 @@
     <h1>Темы по материалу: {{ subjectName }}</h1>
     <button @click="addNewTheme" class="btn add-btn">➕ Добавить новую тему</button>
     <div v-if="themes.length" class="themes-list">
-      <ThemeNode
-        v-for="theme in rootThemes"
-        :key="theme.id"
-        :theme="theme"
-        :all-themes="themes"
-        @refresh="loadThemes"
-      />
+      <ThemeNode v-for="theme in rootThemes" :key="theme.id" :theme="theme" :all-themes="themes"
+        @refresh="loadThemes" />
     </div>
     <div v-else>
       <p>Темы отсутствуют. Добавьте первую тему!</p>
     </div>
     <!-- Новая тема -->
     <div v-if="newThemeVisible" class="new-theme-form">
-      <input 
-        type="number" 
-        v-model="newTheme.position" 
-        placeholder="Позиция" 
-        class="new-theme-input" 
-      />
-      <input 
-        type="text" 
-        v-model="newTheme.name" 
-        placeholder="Название" 
-        class="new-theme-input" 
-      />
+      <input type="number" v-model="newTheme.position" placeholder="Позиция" class="new-theme-input" />
+      <input type="text" v-model="newTheme.name" placeholder="Название" class="new-theme-input" />
       <button @click="saveNewTheme" class="btn save-btn">💾 Сохранить</button>
       <button @click="cancelNewTheme" class="btn cancel-btn">✖ Отменить</button>
     </div>
@@ -47,7 +32,7 @@ export default {
     const subjectId = params.get('subjects');
     const themes = ref([]);
     const rootThemes = ref([]);
-    const newTheme = ref({ position: lastPosition, name: "", subject: {id: subjectId} });
+    const newTheme = ref({ position: lastPosition, name: "", subject: { id: subjectId } });
     const newThemeVisible = ref(false);
     const apiClient = inject("apiClient");
 
@@ -75,11 +60,11 @@ export default {
     };
 
     const addNewTheme = () => {
-      newTheme.value = { 
-        position: lastPosition, 
+      newTheme.value = {
+        position: lastPosition,
         code: Math.random().toString(36).substring(2, 12),
-        name: "", 
-        subject: {id: subjectId} 
+        name: "",
+        subject: { id: subjectId }
       };
       newThemeVisible.value = true;
     };
@@ -95,7 +80,7 @@ export default {
         themes.value.push(response.data);
         rootThemes.value.push(response.data);
         newThemeVisible.value = false;
-        newTheme.value = { position: lastPosition, name: "", subject: {id: subjectId} };
+        newTheme.value = { position: lastPosition, name: "", subject: { id: subjectId } };
       } catch (error) {
         console.error("Ошибка при добавлении темы:", error);
       }

@@ -1,23 +1,23 @@
 <template>
-    <div class="user-profile">
-      <h1>Профиль пользователя</h1>
-      <div class="user-info">
-        <p><strong>Имя:</strong> {{ userData?.fullName || 'Не указано' }}</p>
-        <p><strong>Логин:</strong> {{ userData?.login || 'Не указано' }}</p>
-        <p><strong>Email:</strong> {{ userData?.email || 'Не указано' }}</p>
-        <p><strong>Активен:</strong> {{ userData?.active ? 'Да' : 'Нет' }}</p>
-        <p><strong>Группа:</strong> {{ userData?.group?.name || 'Нет группы' }}</p>
-        <p><strong>Права:</strong> 
-          {{ userData?.rights?.length ? userData.rights.map(r => r.name).join(', ') : 'Нет прав' }}
-        </p>
-      </div>
-  
-      <!-- Кнопка создания приглашения, если пользователь имеет права администратора -->
-      <button v-if="isAdmin" @click="toggleInviteCreation" class="btn">
-        Панель администратора
-      </button>
-
+  <div class="user-profile">
+    <h1>Профиль пользователя</h1>
+    <div class="user-info">
+      <p><strong>Имя:</strong> {{ userData?.fullName || 'Не указано' }}</p>
+      <p><strong>Логин:</strong> {{ userData?.login || 'Не указано' }}</p>
+      <p><strong>Email:</strong> {{ userData?.email || 'Не указано' }}</p>
+      <p><strong>Активен:</strong> {{ userData?.active ? 'Да' : 'Нет' }}</p>
+      <p><strong>Группа:</strong> {{ userData?.group?.name || 'Нет группы' }}</p>
+      <p><strong>Права:</strong>
+        {{ userData?.rights?.length ? userData.rights.map(r => r.name).join(', ') : 'Нет прав' }}
+      </p>
     </div>
+
+    <!-- Кнопка создания приглашения, если пользователь имеет права администратора -->
+    <button v-if="isAdmin" @click="toggleInviteCreation" class="btn">
+      Панель администратора
+    </button>
+
+  </div>
 </template>
 
 <script>
@@ -65,10 +65,10 @@ export default {
       }
 
       const inviteData = {
-       info: { 
-        rights: selectedRoles.value,
-        group: selectedGroup.value,
-       },
+        info: {
+          rights: selectedRoles.value,
+          group: selectedGroup.value,
+        },
         dateEnd: expiryDate.value,
       };
 
@@ -126,17 +126,20 @@ export default {
   max-width: 600px;
   margin: 0 auto;
 }
+
 .user-info {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
 }
+
 .invite-form {
   background-color: #f1f1f1;
   padding: 20px;
   border-radius: 8px;
 }
+
 .btn {
   background-color: #007bff;
   color: white;
@@ -145,21 +148,25 @@ export default {
   cursor: pointer;
   border-radius: 5px;
 }
+
 .btn:hover {
   background-color: #0056b3;
 }
+
 .invite-link {
   margin-top: 20px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .invite-link input {
   flex: 1;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 .invite-link button {
   background-color: #28a745;
   color: white;
@@ -168,6 +175,7 @@ export default {
   cursor: pointer;
   border-radius: 4px;
 }
+
 .invite-link button:hover {
   background-color: #218838;
 }

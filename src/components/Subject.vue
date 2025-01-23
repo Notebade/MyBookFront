@@ -1,16 +1,5 @@
 <template>
     <header class="header">
-      <div class="logo">
-        <h1>My App</h1>
-      </div>
-      <nav>
-        <ul class="menu">
-          <li><router-link to="/">Главная</router-link></li>
-          <li><router-link to="/test">Тесты</router-link></li>
-          <li><router-link to="/practics">Практические</router-link></li>
-          <li><router-link to="/user">Профиль</router-link></li>
-        </ul>
-      </nav>
     </header>
     <button 
       v-if="hasAdminRights || hasTechearRights"

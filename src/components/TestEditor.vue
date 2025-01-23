@@ -287,8 +287,8 @@ export default {
         }
         console.log(formElements.value);
         const requests = formElements.value.map((formElement) =>
-            apiClient.post("/questions", { ...formElement, test: {id:testId}})
-          );
+          apiClient.post("/questions", { ...formElement, test: { id: testId } })
+        );
         alert("Вопросы добавлены");
       } catch (error) {
         console.error("Ошибка:", error);

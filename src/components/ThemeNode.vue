@@ -5,43 +5,25 @@
       <span v-if="!isEditing">
         {{ theme.position }}.
       </span>
-      <input
-        v-else
-        type="number"
-        v-model.number="editablePosition"
-        @keyup.enter="saveEdit"
-        @blur="saveEdit"
-        class="theme-input position-input"
-      />
+      <input v-else type="number" v-model.number="editablePosition" @keyup.enter="saveEdit" @blur="saveEdit"
+        class="theme-input position-input" />
 
       <!-- Редактирование названия -->
       <span v-if="!isEditing">
         {{ theme.name }}
       </span>
-      <input
-        v-else
-        type="text"
-        v-model="editableName"
-        @keyup.enter="saveEdit"
-        @blur="saveEdit"
-        class="theme-input name-input"
-      />
+      <input v-else type="text" v-model="editableName" @keyup.enter="saveEdit" @blur="saveEdit"
+        class="theme-input name-input" />
 
       <!-- Кнопки действий -->
       <button v-if="!isEditing" @click="editTheme" class="btn edit-btn">✏️</button>
       <button v-else @click="saveEdit" class="btn save-btn">💾</button>
       <button @click="deleteTheme(theme.id)" class="btn delete-btn">🗑️</button>
-      <button @click="addSubTheme(theme.id)" class="btn add-btn">➕</button>
     </div>
     <!-- Дочерние темы -->
     <div class="sub-themes" v-if="subThemes.length">
-      <ThemeNode
-        v-for="subTheme in subThemes"
-        :key="subTheme.id"
-        :theme="subTheme"
-        :all-themes="allThemes"
-        @refresh="$emit('refresh')"
-      />
+      <ThemeNode v-for="subTheme in subThemes" :key="subTheme.id" :theme="subTheme" :all-themes="allThemes"
+        @refresh="$emit('refresh')" />
     </div>
   </div>
 
@@ -68,7 +50,7 @@ export default {
     const isEditing = ref(false);
     const editableName = ref(props.theme.name);
     const editablePosition = ref(props.theme.position);
-    const subject = {id: props.theme.subjectId};
+    const subject = { id: props.theme.subjectId };
 
     const subThemes = computed(() =>
       props.allThemes.filter((t) => t.parent === props.theme.id)
