@@ -135,14 +135,21 @@ export default {
       const formattedAnswers = [];
       for (const key in source) {
         const value = source[key];
+
         if (Array.isArray(value)) {
+          // Если значение массив, обрабатываем его элементы
           value.forEach((item) => {
             formattedAnswers.push({ id: Number(item) });
           });
+        } else if (typeof value === 'string') {
+          // Если значение строка, добавляем объект с value
+          formattedAnswers.push({ value, questionId: key });// к сожалению костыл(
         } else if (value !== null) {
+          // Если значение не массив, не строка и не null, добавляем объект с id
           formattedAnswers.push({ id: Number(value) });
         }
       }
+
       return formattedAnswers;
     };
 
@@ -150,6 +157,7 @@ export default {
       try {
         const url = window.location.href;
         const lastParam = url.split("/").slice(-1)[0];
+        console.log(answers.value);
         const result = await apiClient.post("user/test", {
           test: { id: lastParam },
           answers: formatAnswers(answers.value),

@@ -64,7 +64,7 @@
     <form @submit.prevent="saveQuestions" class="test-form">
       <div v-for="(formElement, index) in formElements" :key="index">
         <div class="form-group">
-          <label :for="'input' + index">Вопрос № {{ ++index }}</label>
+          <label :for="'input' + index">Вопрос № {{ index + 1 }} </label>
           <input :id="'input' + index" v-model="formElement.text" required class="form-input" />
         </div>
         <div class="form-group">
@@ -77,7 +77,7 @@
         </div>
         <div class="form-group">
           <label :for="'number' + index">кол-во вариантов</label>
-          <input @change="updateCountAnswers($event.target.value)" :value="formElement.answers.length || 4"
+          <input @change="updateCountAnswers($event.target.value, index)" :value="formElement.answersCount"
             type="number" :id="'number' + index" required class="form-input" />
         </div>
         <div style="border: 1px black;
@@ -146,7 +146,8 @@ export default {
       test: { id: !isNaN(testId) ? testId : null },
       text: "",
       type: { id: null },
-      answers: answers
+      answers: answers,
+      answersCount: 4,
     };
     const question = ref(cloneDeep(initialQuestion));
 
@@ -320,14 +321,12 @@ export default {
       }
       question.value = cloneDeep(initialQuestion);
     };
-    const updateCountAnswers = async (countAnswer) => {
-      console.log(countAnswer);
-      formElements.value.forEach((formElement) => {
-        formElement.answers = [];
-        for (let i = 0; i < countAnswer; i++) {
-          formElement.answers.push(cloneDeep(answer));
-        }
-      });
+    const updateCountAnswers = async (countAnswer, index) => {
+      formElements.value[index].answersCount = countAnswer;
+      formElements.value[index].answers = [];
+      for (let i = 0; i < countAnswer; i++) {
+        formElements.value[index].answers.push(cloneDeep(answer));
+      }
     };
 
     onMounted(async () => {
