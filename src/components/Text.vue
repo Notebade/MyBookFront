@@ -2,6 +2,9 @@
   <button class="btn navigate-btn" :onclick="navigateBack">
     Назад
   </button>
+  <button class="btn navigate-btn" :onclick="navigateCreate">
+    Создать
+  </button>
   <div class="content" v-if="theme && theme.text && theme.text.length">
     <div v-for="block in theme.text" :key="block.id" class="text-block">
       <p>{{ block.text }}</p>
@@ -46,10 +49,18 @@ export default {
         console.error("subjectId отсутствует!");
       }
     };
+    const navigateCreate = () => {
+      if (theme.value && theme.value.subjectId) {
+        location.href = `/text/editor/${theme.value.subjectId}`;
+      } else {
+        console.error("subjectId отсутствует!");
+      }
+    }
 
     return {
       theme,
       navigateBack,
+      navigateCreate,
     };
   },
 };

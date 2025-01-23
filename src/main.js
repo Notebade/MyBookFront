@@ -13,6 +13,7 @@ import Theme from "@/components/Theme.vue";
 import ThemeEditor from "@/components/ThemeEditor.vue";
 import ThemeNode from "@/components/ThemeNode.vue";
 import Text from "@/components/Text.vue";
+import TextEditor from "@/components/TextEditor.vue";
 import Test from "@/components/Test.vue";
 import TestViev from "@/components/TestViev.vue";
 import TestEditor from "@/components/TestEditor.vue";
@@ -114,6 +115,10 @@ if(hasRequiredRights) {
     {
       path: "/discipline/editor",
       component: DisciplineEditor,
+    },
+    {
+      path : "/text/editor/:id",
+      component: TextEditor,
     },
     {
       path: "/discipline/editor/:id",
