@@ -3,7 +3,7 @@ const userData = localStorage.getItem('userData');
 const user = userData ? JSON.parse(userData) : null;
 
 const apiClient = axios.create({
-  baseURL: 'http://89.19.44.166:8000',//http://localhost:8000',
+  baseURL: 'http://localhost:8000',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

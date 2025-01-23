@@ -87,7 +87,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await this.apiClient.post("/list/users");
+        const response = await this.apiClient.post("/list/users", {rights: [{code: "admin"}, {'code': 'teacher'}]});
         this.formData.authors = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке списка пользователей:", error);
