@@ -11,6 +11,9 @@
             <button @click="setActiveForm('users')" :class="{ active: activeForm === 'users' }" class="toggle-button">
                 Активация пользователей
             </button>
+            <button @click="setActiveForm('invite')" :class="{ active: activeForm === 'invite' }" class="toggle-button">
+                Создание приглашения
+            </button>
         </div>
 
         <!-- Forms -->
@@ -26,9 +29,12 @@
                         <label for="group-name">Название группы</label>
                         <input type="text" id="group-name" v-model="group.name" placeholder="Введите название группы" />
                     </div>
-                    <button type="submit" class="submit-button">Сохранить группу</button>
-                    <button class="submit-button" style="margin-left: 2%;">Удалить группу</button>
-                    <button @click="clearForms" class="submit-button" style="margin-top: 2%;">Очистить группу</button>
+                    <button class="submit-button"> {{ isGroupSelected ? "Обновить" : "Сохранить" }} группу</button>
+                    <button class="submit-button" v-if="isGroupSelected" @click="deleteGroups"
+                        style="margin-left: 2%; background-color: rgb(357,80,94);">Удалить
+                        группу</button>
+                    <button v-if="isGroupSelected" @click="clearForms" class="submit-button"
+                        style="margin-top: 2%;">Очистить группу</button>
                 </form>
                 <h2 class="form-title mt-6">Список групп</h2>
                 <div class="table-container">
@@ -53,13 +59,57 @@
 
             <div v-if="activeForm === 'users'" class="form">
                 <h2 class="form-title">Активация пользователей</h2>
-                <form>
-                    <div class="form-field">
-                        <label for="user-email">Email пользователя</label>
-                        <input type="email" id="user-email" placeholder="Введите email пользователя" />
-                    </div>
-                    <button type="submit" class="submit-button">Активировать пользователя</button>
-                </form>
+                <div class="table-container">
+                    <table class="group-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ФИО</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr @click="activeUser(user.id)" v-for="user in formElementsUsers" :key="user.id">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.fullName }}</td>
+                                <td>{{ user.active }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div v-if="activeForm === 'invite'" class="form">
+                <h2 class="form-title">Создание приглашения</h2>
+                <div class="form-group">
+                    <label for="roles" class="form-label">Выберите роли:</label>
+                    <select id="roles" class="form-select" multiple v-model="selectedRoles">
+                        <option v-for="role in roles" :key="role.id" :value="role">
+                            {{ role.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="group" class="form-label">Выберите группу:</label>
+                    <select id="group" class="form-select" v-model="selectedGroup">
+                        <option v-for="group in groups" :key="group.id" :value="group">
+                            {{ group.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="expiry" class="form-label">Дата истечения приглашения:</label>
+                    <input type="date" id="expiry" class="form-input" v-model="expiryDate" />
+                </div>
+
+                <button class="btn-primary" @click="createInvite">Создать</button>
+
+                <div v-if="inviteLink" class="invite-link">
+                    <p><strong>Ссылка для приглашения:</strong></p>
+                    <input type="text" class="form-input readonly" :value="inviteLink" readonly />
+                    <button class="btn-secondary" @click="copyInviteLink">Скопировать</button>
+                </div>
             </div>
         </div>
     </div>
@@ -73,15 +123,49 @@ export default {
         const apiClient = inject("apiClient");
         const activeForm = ref("groups");
         const formElements = ref([]);
+        const formElementsUsers = ref([]);
+        const selectedRoles = ref([]);
+        const selectedGroup = ref('');
+        const selectedGroups = ref(false);
+        const inviteLink = ref('');
+        const expiryDate = ref('');
+
+        const roles = ref([]);
+        const groups = ref([]);
 
         const group = ref({
             id: null,
             code: "",
             name: "",
         });
+        const isGroupSelected = computed(() => selectedGroups.value);
 
-        const setActiveForm = (form) => {
-            activeForm.value = form; // Обновляем значение через .value
+        const setActiveForm = async (form) => {
+            activeForm.value = form;
+            switch (activeForm.value) {
+                case 'groups':
+                    await loadGroups();
+                    break;
+
+                case 'users':
+                    await loadUsers();
+                    break;
+
+                default:
+                    await loadSelectorsData();
+                    break;
+            }
+        };
+
+        const loadSelectorsData = async () => {
+            try {
+                const rolesResponse = await apiClient.post('/list/rights');
+                const groupsResponse = await apiClient.post('/list/groups');
+                roles.value = rolesResponse.data;
+                groups.value = groupsResponse.data;
+            } catch (error) {
+                console.error('Ошибка загрузки данных для селекторов:', error);
+            }
         };
 
         const loadGroups = async () => {
@@ -93,12 +177,67 @@ export default {
             }
         };
 
+        const loadUsers = async () => {
+            try {
+                const response = await apiClient.post("/list/users", { active: false });
+                formElementsUsers.value = response.data;
+            } catch (error) {
+                console.error("Ошибка загрузки групп:", error);
+            }
+        };
+
         const clearForms = () => {
+            selectedGroups.value = false
             group.value = ref({
                 id: null,
                 code: "",
                 name: "",
             });
+        };
+
+        const createInvite = async () => {
+            if (!selectedRoles.value.length || !selectedGroup.value || !expiryDate.value) {
+                alert('Пожалуйста, выберите роли, группу и укажите дату истечения.');
+                return;
+            }
+
+            const inviteData = {
+                info: {
+                    rights: selectedRoles.value,
+                    group: selectedGroup.value,
+                },
+                dateEnd: expiryDate.value,
+            };
+
+            try {
+                const response = await apiClient.post('/user/zov', inviteData);
+                const inviteCode = response.data.code;
+
+                // Формирование ссылки
+                const domain = window.location.origin; // Использует текущий домен
+                inviteLink.value = `${domain}/registration?invite=${inviteCode}`;
+
+                alert('Приглашение успешно создано!');
+                // Очистка выбора
+                selectedRoles.value = [];
+                selectedGroup.value = '';
+                expiryDate.value = '';
+            } catch (error) {
+                console.error('Ошибка при создании приглашения:', error);
+                alert('Не удалось создать приглашение.');
+            }
+        };
+
+        const activeUser = async (id) => {
+            try {
+                let response;
+                if (id != null) {
+                    response = await apiClient.get("/user/" + id + "/active");
+                }
+                await loadUsers();
+            } catch (error) {
+                console.error("Ошибка сохранения групп:", error);
+            }
         };
         const saveGroups = async () => {
             try {
@@ -114,21 +253,54 @@ export default {
                 console.error("Ошибка сохранения групп:", error);
             }
         };
-        const selectGroup = async (id) => {
-            group.value = formElements.value.find(element => element.id === id);
+        const copyInviteLink = () => {
+            navigator.clipboard.writeText(inviteLink.value).then(() => {
+                alert('Ссылка скопирована в буфер обмена!');
+            });
         };
+        const selectGroup = async (id) => {
+            selectedGroups.value = true
+            const response = await apiClient.get("/groups/" + id);
+            group.value = response.data;
+        };
+        const deleteGroups = async () => {
+            try {
+                let response;
+                if (group.value.id !== null) {
+                    response = await apiClient.delete("/groups/" + group.value.id);
+                }
+                clearForms();
+                await loadGroups();
+            } catch (error) {
+                console.error("Ошибка сохранения групп:", error);
+            }
+        }
         onMounted(async () => {
             await loadGroups();
-
         });
         return {
             activeForm,
             group,
+            selectedGroup,
             formElements,
+            isGroupSelected,
             saveGroups,
             selectGroup,
             setActiveForm,
             clearForms,
+            deleteGroups,
+            loadUsers,
+            formElementsUsers,
+            activeUser,
+            createInvite,
+            inviteLink,
+            copyInviteLink,
+            loadSelectorsData,
+            groups,
+            roles,
+            selectedGroups,
+            selectedRoles,
+            expiryDate,
         };
     },
 };
@@ -295,5 +467,100 @@ body {
 .group-table td {
     font-size: 14px;
     color: #555;
+}
+
+/* Стили для группы элементов */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Стили для меток */
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Стили для выпадающих списков */
+.form-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+/* Стили для текстового ввода */
+.form-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+/* Стили для кнопок */
+.btn-primary {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #6c757d;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #565e64;
+}
+
+/* Стили для поля только для чтения */
+.readonly {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* Стили для блока с ссылкой */
+.invite-link {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
 }
 </style>

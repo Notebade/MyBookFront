@@ -14,41 +14,9 @@
   
       <!-- Кнопка создания приглашения, если пользователь имеет права администратора -->
       <button v-if="isAdmin" @click="toggleInviteCreation" class="btn">
-        {{ showInviteForm ? 'Отменить' : 'Создать приглашение' }}
+        Панель администратора
       </button>
-  
-      <!-- Форма создания приглашения -->
-      <div v-if="showInviteForm" class="invite-form">
-        <h2>Создать приглашение</h2>
-        <div>
-          <label for="roles">Выберите роли:</label>
-          <select id="roles" multiple v-model="selectedRoles">
-            <option v-for="role in roles" :key="role.id" :value="role">
-              {{ role.name }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label for="group">Выберите группу:</label>
-          <select id="group" v-model="selectedGroup">
-            <option v-for="group in groups" :key="group.id" :value="group">
-              {{ group.name }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label for="expiry">Дата истечения приглашения:</label>
-          <input type="date" id="expiry" v-model="expiryDate" />
-        </div>
-        <button @click="createInvite">Создать</button>
-      </div>
 
-      <!-- Ссылка для приглашения -->
-      <div v-if="inviteLink" class="invite-link">
-        <p><strong>Ссылка для приглашения:</strong></p>
-        <input type="text" :value="inviteLink" readonly />
-        <button @click="copyInviteLink">Скопировать</button>
-      </div>
     </div>
 </template>
 
@@ -86,7 +54,7 @@ export default {
 
     // Переключение формы создания приглашения
     const toggleInviteCreation = () => {
-      showInviteForm.value = !showInviteForm.value;
+      window.location.replace('/admin')
     };
 
     // Создание приглашения
