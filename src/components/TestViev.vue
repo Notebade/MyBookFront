@@ -48,7 +48,7 @@
         </div>
 
         <!-- Ввод текста -->
-        <div v-if="question.type.code === 'textAria'">
+        <div v-if="question.type.code === 'textArea'">
           <textarea v-model="answers[question.id]" placeholder="Введите ответ"></textarea>
         </div>
       </div>
