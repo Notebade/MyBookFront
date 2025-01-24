@@ -50,8 +50,10 @@ export default {
       }
     };
     const navigateCreate = () => {
-      if (theme.value && theme.value.subjectId) {
-        location.href = `/text/editor/${theme.value.subjectId}`;
+      const url = window.location.href;
+        const id = url.split("/").pop();
+      if (id) {
+        location.href = `/text/editor/${id}`;
       } else {
         console.error("subjectId отсутствует!");
       }
